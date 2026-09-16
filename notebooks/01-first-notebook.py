@@ -42,11 +42,24 @@ __generated_with = "0.24.2"
 app = marimo.App(width="medium", sql_output="pandas")
 
 
+app._unparsable_cell(
+    r"""
+    i
+    hiimport marimo as mo
+    """,
+    name="_"
+)
+
+
 @app.cell
 def _():
-    import marimo as mo
+    1+3
+    return
 
-    return (mo,)
+
+@app.cell
+def _():
+    return
 
 
 @app.cell(hide_code=True)
@@ -95,7 +108,7 @@ def _(mo):
 
 @app.cell
 def _():
-    freight_charges = [16.75, 22.25, 25.00, 20.25, 36.25]
+    freight_charges = [999, 22.25, 25.00, 20.25, 36.25]
     freight_charges
     return (freight_charges,)
 
@@ -121,7 +134,13 @@ def _(mo):
     return
 
 
-@app.cell(hide_code=True)
+@app.cell
+def _(freight_charges):
+    freight_charges[0]
+    return
+
+
+@app.cell
 def _(mo):
     mo.md(r"""
     # 🙋 Before You Run Anything
@@ -145,6 +164,15 @@ def _(mo):
     typing inside one cell. Use the **undo** button at the bottom right, which stays
     there until you close the notebook, or `Ctrl+K` and search for undo.*
     """)
+    return
+
+
+@app.cell
+def _():
+    print("Experiment 1: I think all the other cells invloving number 0 (16.25) is gonna change with it after the change is ran in the original code")
+    print("Experiment 2: The other cells might stop working because freight_charges is gone.")
+    print("Experiment 3: total becomes 1, so the old answer gets replaced.")
+    print("Experiment 4: I think yes, as long as freight_charges still exists.")
     return
 
 
