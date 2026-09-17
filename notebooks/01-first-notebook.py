@@ -108,12 +108,12 @@ def _(mo):
 
 @app.cell
 def _():
-    freight_charges = [999, 22.25, 25.00, 20.25, 36.25]
+    freight_charges = [16.75, 22.25, 25.00, 20.25, 36.25]
     freight_charges
     return (freight_charges,)
 
 
-@app.cell(hide_code=True)
+@app.cell
 def _(mo):
     mo.md(r"""
     # ✏️ Add Three Cells
@@ -138,6 +138,19 @@ def _(mo):
 def _(freight_charges):
     freight_charges[0]
     return
+
+
+@app.cell
+def _(freight_charges):
+    len(freight_charges)
+    return
+
+
+@app.cell
+def _(freight_charges):
+    total = sum(freight_charges)
+    total
+    return (total,)
 
 
 @app.cell
@@ -169,14 +182,19 @@ def _(mo):
 
 @app.cell
 def _():
-    print("Experiment 1: I think all the other cells invloving number 0 (16.25) is gonna change with it after the change is ran in the original code")
-    print("Experiment 2: The other cells might stop working because freight_charges is gone.")
-    print("Experiment 3: total becomes 1, so the old answer gets replaced.")
-    print("Experiment 4: I think yes, as long as freight_charges still exists.")
+    # prediction 1: I think all the other cells involving number 0 (16.25) are going to change with it after the change is run in the original code.
+    # prediction 2: The other cells might stop working because freight_charges is gone.
+    # prediction 3: total becomes 1, so the old answer gets replaced.
+    # prediction 4: I think yes, as long as freight_charges still exists.
+
+    # Experiment 1: My prediction was right after running the original cell; all cells involving the number 0 (16.25) changed to (999).
+    # Experiment 2: I deleted the freight_charges, and nothing happened in the beginning even after I ran the cell function of total = sum(freight_charges), len(freight_charges), and freight_charges[0]. But then I realized that I ran the freight_charges, so the data is still being stored there for when I run it again, basically nullifying it, and an error shows up: "NameError: name 'freight_charges' is not defined" because the information isn't stored anymore.
+    # Experiment 3: After trying it, it gave me this error message: Cell not run. This cell redefines variables from other cells. 'Total' was also defined by cell 7, and the original cell that I added also had a similar error but was defined by cell 11.
+    # Experiment 4: My prediction was correct; as long as they both exist, they contradict each other
     return
 
 
-@app.cell(hide_code=True)
+@app.cell
 def _(mo):
     mo.md(r"""
     # ▶️ What Happened
@@ -198,6 +216,13 @@ def _(mo):
     return
 
 
+@app.cell
+def _():
+    new_total = 9
+
+    return
+
+
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
@@ -215,7 +240,7 @@ def _():
     return (orders,)
 
 
-@app.cell(hide_code=True)
+@app.cell
 def _(mo):
     mo.md(r"""
     # 🙋 Explore
@@ -231,6 +256,65 @@ def _(mo):
     6. `orders * 2`, then `orders + freight_charges`. Neither one is an error.
     7. `sorted(freight_charges)`, then `sorted(freight_charges, reverse=True)`. What did `reverse=True` change, and did `freight_charges` itself change?
     """)
+    return
+
+
+@app.cell
+def _(freight_charges):
+    freight_charges[-1]
+    return
+
+
+@app.cell
+def _(freight_charges):
+    freight_charges[:3]
+    return
+
+
+@app.cell
+def _(orders):
+    orders[0] 
+    #first number in the list 
+    return
+
+
+@app.cell
+def _(freight_charges):
+    freight_charges[0]
+    #first number in the list 
+    return
+
+
+@app.cell
+def _():
+    category = "Confections"
+    len(category) #It's counting 11 instead of 5 like previously.
+    return
+
+
+@app.cell
+def _(orders):
+    orders * 2 # duplicated my order fuction
+
+    return
+
+
+@app.cell
+def _(freight_charges, orders):
+    orders + freight_charges #added freight + orders and listed/couted them
+    return
+
+
+@app.cell
+def _(freight_charges):
+    sorted(freight_charges) #sorted low to high
+
+    return
+
+
+@app.cell
+def _(freight_charges):
+    sorted(freight_charges, reverse=True) #sorted high to low 
     return
 
 
@@ -261,16 +345,28 @@ def _(mo):
     return
 
 
-@app.cell(hide_code=True)
+@app.cell
 def _(mo):
     mo.md(r"""
     # 🙋 Text That Looks Like a Number
 
     Write down what each line gives, then put each one in a cell of your own.
 
-    1. `"16.75" + "22.25"`
-    2. `16.75 + "22.25"`
+    1. `"16.75" + "22.25"` # =39
+    2. `16.75 + "22.25"`  # =39
     """)
+    return
+
+
+@app.cell
+def _():
+    "16.75" + "22.25" #'16.7522.25'
+    return
+
+
+@app.cell
+def _():
+    16.75 + "22.25" #TypeError unsupported operand type(s) for +: 'float' and 'str'
     return
 
 
@@ -290,7 +386,7 @@ def _(mo):
     return
 
 
-@app.cell(hide_code=True)
+@app.cell
 def _(mo):
     mo.md(r"""
     # ✏️ Compare Two Charges
@@ -305,6 +401,25 @@ def _(mo):
 
     📖 Handbook: Python §3 Expressions and operators
     """)
+    return
+
+
+@app.cell
+def _(freight_charges):
+    freight_charges[0] > 20 #True
+
+    return
+
+
+@app.cell
+def _(freight_charges):
+    freight_charges[-1] == max(freight_charges)
+    return
+
+
+@app.cell
+def _():
+    type(True) # both <class 'bool'>
     return
 
 
@@ -324,13 +439,20 @@ def _(freight_charges, orders):
     return
 
 
-@app.cell(hide_code=True)
+@app.cell
 def _(mo):
     mo.md(r"""
     The `f` before the quotes makes this an **f-string**. Python works out anything inside `{ }` and places it in the text. `:.2f` shows exactly two decimal places.
 
     📖 Handbook: Python §6 f-strings
     """)
+    return
+
+
+@app.cell
+def _(freight_charges, orders):
+    print(f"Order {orders[1]:.2f} paid ${freight_charges[2]:.2f} in freight.") 
+
     return
 
 
@@ -346,6 +468,12 @@ def _(mo):
     return
 
 
+@app.cell
+def _(freight_charges, total):
+    print(f"order {total:.2f} paid ${total / len(freight_charges):.2f}.")
+    return
+
+
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
@@ -356,7 +484,7 @@ def _(mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(freight_charges):
     over_20 = []
     for charge in freight_charges:
@@ -378,7 +506,7 @@ def _(mo):
     return
 
 
-@app.cell(hide_code=True)
+@app.cell
 def _(mo):
     mo.md(r"""
     # ✏️ Charges Below 25
@@ -396,7 +524,17 @@ def _(mo):
     return
 
 
-@app.cell(hide_code=True)
+@app.cell
+def _(freight_charges):
+    below_25 = []
+    for charge in freight_charges:
+        if charge < 25:
+            below_25.append(charge)
+    below_25
+    return
+
+
+@app.cell
 def _(mo):
     mo.md(r"""
     # ▶️ Read the Last Line First
@@ -414,7 +552,13 @@ def _(mo):
     return
 
 
-@app.cell(hide_code=True)
+@app.cell
+def _(freight_charges):
+    freight_charges[5]
+    return
+
+
+@app.cell
 def _(mo):
     mo.md(r"""
     # ✏️ Break It Three Ways
@@ -434,6 +578,27 @@ def _(mo):
     return
 
 
+@app.cell
+def _():
+    import pandsa
+
+    return
+
+
+@app.cell
+def _():
+    open("sales.csv")
+    return
+
+
+app._unparsable_cell(
+    r"""
+    new_charges = [16.75, 22.25
+    """,
+    name="_"
+)
+
+
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
@@ -443,6 +608,12 @@ def _(mo):
 
     `max(["9.50", "16.75", "22.25"])`
     """)
+    return
+
+
+@app.cell
+def _():
+    max(["9.50", "16.75", "22.25"]) #'9.50'
     return
 
 
@@ -460,13 +631,19 @@ def _(mo):
     return
 
 
-@app.cell(hide_code=True)
+@app.cell
 def _(mo):
     mo.md(r"""
     # ✏️ Read This One on Paper
 
     **By hand, with no agent.** When code an agent wrote is the thing that broke, reading the error yourself is how you find out why.
 
+    A file called `hello.py`, with its line numbers:
+
+    ```text
+    1  freight_charges = [16.75, 22.25, "pending", 9.50]
+    2
+    3  total
     A file called `hello.py`, with its line numbers:
 
     ```text
@@ -485,14 +662,14 @@ def _(mo):
     TypeError: unsupported operand type(s) for +: 'float' and 'str'
     ```
 
-    1. Which line does Python name?
-    2. Which line would you change, and why is it a different line from the one Python named?
-    3. What would you change it to? More than one answer is defensible, so state the rule you chose.
+    1. Which line does Python name? # line 3
+    2. Which line would you change, and why is it a different line from the one Python named? #line one the "pending" because the problem isnt really in line 3 but line 3 is hitting a wall because of the "pending"
+    3. What would you change it to? More than one answer is defensible, so state the rule you chose. = sum(freight_charges)
     """)
     return
 
 
-@app.cell(hide_code=True)
+@app.cell
 def _(mo):
     mo.md(r"""
     # ✏️ The List as a Bar Chart
@@ -518,6 +695,18 @@ def _(mo):
 
     The square brackets inside `_ax.bar(...)` are a **list comprehension**, which **iterates** over `orders` and turns each number into text.
     """)
+    return
+
+
+@app.cell
+def _(freight_charges, orders):
+
+    import matplotlib.pyplot as plt
+
+    _fig, _ax = plt.subplots(figsize=(6, 2.6))
+    _ax.bar([str(_o) for _o in orders], freight_charges)
+    _ax.set_ylabel("freight")
+    _fig
     return
 
 
