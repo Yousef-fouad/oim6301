@@ -664,7 +664,7 @@ def _(mo):
 
     1. Which line does Python name? # line 3
     2. Which line would you change, and why is it a different line from the one Python named? #line one the "pending" because the problem isnt really in line 3 but line 3 is hitting a wall because of the "pending"
-    3. What would you change it to? More than one answer is defensible, so state the rule you chose. = sum(freight_charges)
+    3. What would you change it to? More than one answer is defensible, so state the rule you chose. = sum(freight_charges) # i would change the number to 0 since it is pending
     """)
     return
 
