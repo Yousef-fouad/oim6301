@@ -59,7 +59,9 @@ def _():
 
 @app.cell
 def _():
-    return
+    freight_charges = [16.75, 22.25, 25.00, 20.25, 36.25]
+    freight_charges
+    return (freight_charges,)
 
 
 @app.cell(hide_code=True)
@@ -90,7 +92,7 @@ def _(mo):
     return
 
 
-@app.cell(hide_code=True)
+@app.cell
 def _(mo):
     mo.md(r"""
     # ▶️ A Name Holding Several Things
@@ -104,13 +106,6 @@ def _(mo):
     📖 Handbook: Python §1 Variables and values, §11 Lists
     """)
     return
-
-
-@app.cell
-def _():
-    freight_charges = [16.75, 22.25, 25.00, 20.25, 36.25]
-    freight_charges
-    return (freight_charges,)
 
 
 @app.cell
@@ -148,7 +143,7 @@ def _(freight_charges):
 
 @app.cell
 def _(freight_charges):
-    total = sum(freight_charges)
+    total= sum(freight_charges)
     total
     return (total,)
 
@@ -188,7 +183,7 @@ def _():
     # prediction 4: I think yes, as long as freight_charges still exists.
 
     # Experiment 1: My prediction was right after running the original cell; all cells involving the number 0 (16.25) changed to (999).
-    # Experiment 2: I deleted the freight_charges, and nothing happened in the beginning even after I ran the cell function of total = sum(freight_charges), len(freight_charges), and freight_charges[0]. But then I realized that I ran the freight_charges, so the data is still being stored there for when I run it again, basically nullifying it, and an error shows up: "NameError: name 'freight_charges' is not defined" because the information isn't stored anymore.
+    # Experiment 2: I deleted the freight_charges, total = sum(freight_charges), len(freight_charges), and freight_charges[0]. Gave me an error shows up: "NameError: name 'freight_charges' is not defined" because the information isn't stored anymore.
     # Experiment 3: After trying it, it gave me this error message: Cell not run. This cell redefines variables from other cells. 'Total' was also defined by cell 7, and the original cell that I added also had a similar error but was defined by cell 11.
     # Experiment 4: My prediction was correct; as long as they both exist, they contradict each other
     return
@@ -213,13 +208,6 @@ def _(mo):
 
     📖 Handbook: Python §1 Variables and values
     """)
-    return
-
-
-@app.cell
-def _():
-    new_total = 9
-
     return
 
 
@@ -249,25 +237,45 @@ def _(mo):
     back depends on what kind of value you hand it, which the next section names.
 
     1. `freight_charges[-1]`
-    2. `freight_charges[:3]`, which is a **slice**
-    3. `orders[0]` and `freight_charges[0]`. What do those two have in common?
-    4. `category = "Confections"`, then `len(category)`. `len` counted five things a moment ago. What is it counting now?
-    5. `sum(orders)`. It runs. Should it?
-    6. `orders * 2`, then `orders + freight_charges`. Neither one is an error.
-    7. `sorted(freight_charges)`, then `sorted(freight_charges, reverse=True)`. What did `reverse=True` change, and did `freight_charges` itself change?
+         # prediction: would give me the number thats second of the list
+         # experiment:# gives number from the bottom of the list
+    3. `freight_charges[:3]`, which is a **slice**
+         # prediction: choose the top 3 number and list them
+         # experiment: listed the first 3 numbers in veriable list 'freight_charges'
+    6. `orders[0]` and `freight_charges[0]`. What do those two have in common?
+         # prediction: they would both give the frist number on the list
+         # experiment: they both gave me the first number on the veriables list
+    8. `category = "Confections"`, then `len(category)`. `len` counted five things a moment ago. What is it counting now?
+         # prediction: how many number are in all veriables listed in cells
+         # experiment: how many number of letters are in 'Confections'
+    10. `sum(orders)`. It runs. Should it? # no it shouldn't run but i think python understands therefor it does run (correct input: 'total = sum(orders)' second line ('total'))
+    11. `orders * 2`, then `orders + freight_charges`. Neither one is an error.
+         # prediction: for 'orders * 2' it would mutiply all values inside list by 2
+         # experiment: all number in list duplicated
+         # prediction: 'orders + freight_charges' add both of them and list them
+         # experiment: listed all values inside 'orders' and inside 'freight_charges' in one list
+    13. `sorted(freight_charges)`, then `sorted(freight_charges, reverse=True)`. What did `reverse=True` change, and did `freight_charges` itself change?
+         # prediction: `sorted(freight_charges)` would sort them greatest to least and `sorted(freight_charges, reverse=True)` would do the oppsite
+         # experiment: `sorted(freight_charges)` sorted them greatest to least and `sorted(freight_charges, reverse=True)` would do the oppsite (lowest to greatest)
     """)
     return
 
 
 @app.cell
 def _(freight_charges):
-    freight_charges[-1]
+    freight_charges[-1] #goes from the bottom of the list 
     return
 
 
 @app.cell
 def _(freight_charges):
-    freight_charges[:3]
+    freight_charges[:3] #list first 3 on list
+    return
+
+
+@app.cell
+def _(orders):
+    sum (orders) #total amount of orders in $
     return
 
 
@@ -295,7 +303,6 @@ def _():
 @app.cell
 def _(orders):
     orders * 2 # duplicated my order fuction
-
     return
 
 
@@ -308,7 +315,6 @@ def _(freight_charges, orders):
 @app.cell
 def _(freight_charges):
     sorted(freight_charges) #sorted low to high
-
     return
 
 
@@ -318,7 +324,7 @@ def _(freight_charges):
     return
 
 
-@app.cell(hide_code=True)
+@app.cell
 def _(mo):
     mo.md(r"""
     # ▶️ What Type Is It
@@ -331,7 +337,7 @@ def _(mo):
 
 @app.cell
 def _(freight_charges, orders):
-    [type(freight_charges[0]), type(orders[0]), type("Confections"), type(freight_charges[0] > 20)]
+    type(freight_charges[0]), type(orders[0]), type("Confections"), type(freight_charges[0] > 20)
     return
 
 
@@ -360,11 +366,11 @@ def _(mo):
 
 @app.cell
 def _():
-    "16.75" + "22.25" #'16.7522.25'
+    "16.75" + "22.25" #'16.7522.25' because it took them both as text instead of # and just joined them in one line
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _():
     16.75 + "22.25" #TypeError unsupported operand type(s) for +: 'float' and 'str'
     return
@@ -406,8 +412,7 @@ def _(mo):
 
 @app.cell
 def _(freight_charges):
-    freight_charges[0] > 20 #True
-
+    freight_charges[0] > 20 #False
     return
 
 
@@ -420,6 +425,12 @@ def _(freight_charges):
 @app.cell
 def _():
     type(True) # both <class 'bool'>
+    return
+
+
+@app.cell
+def _():
+    type(False)
     return
 
 
@@ -452,7 +463,6 @@ def _(mo):
 @app.cell
 def _(freight_charges, orders):
     print(f"Order {orders[1]:.2f} paid ${freight_charges[2]:.2f} in freight.") 
-
     return
 
 
@@ -527,9 +537,9 @@ def _(mo):
 @app.cell
 def _(freight_charges):
     below_25 = []
-    for charge in freight_charges:
-        if charge < 25:
-            below_25.append(charge)
+    for charges in freight_charges:
+        if charges <= 25:
+            below_25.append(charges)
     below_25
     return
 
@@ -554,7 +564,7 @@ def _(mo):
 
 @app.cell
 def _(freight_charges):
-    freight_charges[5]
+    freight_charges[5] #due to not having # 5 on the list as the list starts from 0-4 
     return
 
 
@@ -580,20 +590,20 @@ def _(mo):
 
 @app.cell
 def _():
-    import pandsa
+    import pandsa #there is no module that is downloaded named pandsa, giving me the option to install it on the top right corner 
 
     return
 
 
 @app.cell
 def _():
-    open("sales.csv")
+    open("sales.csv") #there is no file that marimo can reach that is called sales.csv
     return
 
 
 app._unparsable_cell(
     r"""
-    new_charges = [16.75, 22.25
+    new_charges = [16.75, 22.25 # braket was not closed and new_charges variable was not closed ethier
     """,
     name="_"
 )
@@ -613,7 +623,7 @@ def _(mo):
 
 @app.cell
 def _():
-    max(["9.50", "16.75", "22.25"]) #'9.50'
+    max(["9.50", "16.75", "22.25"]) #'9.50' because its treating them as text due to the "" therefor 9 is greater than 1,2 which are the first character of each text
     return
 
 
@@ -643,12 +653,6 @@ def _(mo):
     ```text
     1  freight_charges = [16.75, 22.25, "pending", 9.50]
     2
-    3  total
-    A file called `hello.py`, with its line numbers:
-
-    ```text
-    1  freight_charges = [16.75, 22.25, "pending", 9.50]
-    2
     3  total = sum(freight_charges)
     4  print(total)
     ```
@@ -663,9 +667,24 @@ def _(mo):
     ```
 
     1. Which line does Python name? # line 3
-    2. Which line would you change, and why is it a different line from the one Python named? #line one the "pending" because the problem isnt really in line 3 but line 3 is hitting a wall because of the "pending"
-    3. What would you change it to? More than one answer is defensible, so state the rule you chose. = sum(freight_charges) # i would change the number to 0 since it is pending
+    2. Which line would you change, and why is it a different line from the one Python named? #line one the "pending" because the problem isnt really in line 3 but line 3 is hitting a wall because of the "pending". (if i would run it here i would change the whole thing to:
+
+        'freight_charge = [16.75, 22.25, 0, 9.50]
+        totals = sum(freight_charge)
+        print(totals)'
+
+        due avoiding redefining cells that i wrote on top ('freight_charges, total') )
+
+    4. What would you change it to? More than one answer is defensible, so state the rule you chose. = sum(freight_charges) # i would change the number to 0 since it is pending
     """)
+    return
+
+
+@app.cell
+def _():
+    freight_charge = [16.75, 22.25, 0, 9.50]
+    totals= sum(freight_charge)
+    print(totals)
     return
 
 
@@ -706,6 +725,7 @@ def _(freight_charges, orders):
     _fig, _ax = plt.subplots(figsize=(6, 2.6))
     _ax.bar([str(_o) for _o in orders], freight_charges)
     _ax.set_ylabel("freight")
+    _ax.set_xlabel("orders")
     _fig
     return
 
