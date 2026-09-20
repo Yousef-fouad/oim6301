@@ -38,7 +38,7 @@ chart is code a student pastes after running `uv add matplotlib`.
 
 import marimo
 
-__generated_with = "0.24.2"
+__generated_with = "0.24.0"
 app = marimo.App(width="medium", sql_output="pandas")
 
 
@@ -49,6 +49,13 @@ app._unparsable_cell(
     """,
     name="_"
 )
+
+
+@app.cell
+def _():
+    import marimo as mo
+
+    return (mo,)
 
 
 @app.cell
@@ -182,10 +189,10 @@ def _():
     # prediction 3: total becomes 1, so the old answer gets replaced.
     # prediction 4: I think yes, as long as freight_charges still exists.
 
-    # Experiment 1: My prediction was right after running the original cell; all cells involving the number 0 (16.25) changed to (999).
-    # Experiment 2: I deleted the freight_charges, total = sum(freight_charges), len(freight_charges), and freight_charges[0]. Gave me an error shows up: "NameError: name 'freight_charges' is not defined" because the information isn't stored anymore.
+    # Experiment 1: My prediction was right after running the original cell; all cells involving the number 0 (16.75) changed to (999).
+    # Experiment 2: All cells involving freight_charges went blank 
     # Experiment 3: After trying it, it gave me this error message: Cell not run. This cell redefines variables from other cells. 'Total' was also defined by cell 7, and the original cell that I added also had a similar error but was defined by cell 11.
-    # Experiment 4: My prediction was correct; as long as they both exist, they contradict each other
+    # Experiment 4: It ran, because Marimo runs cells based on dependencies 
     return
 
 
@@ -239,24 +246,24 @@ def _(mo):
     1. `freight_charges[-1]`
          # prediction: would give me the number thats second of the list
          # experiment:# gives number from the bottom of the list
-    3. `freight_charges[:3]`, which is a **slice**
+    2. `freight_charges[:3]`, which is a **slice**
          # prediction: choose the top 3 number and list them
          # experiment: listed the first 3 numbers in veriable list 'freight_charges'
-    6. `orders[0]` and `freight_charges[0]`. What do those two have in common?
+    3. `orders[0]` and `freight_charges[0]`. What do those two have in common?
          # prediction: they would both give the frist number on the list
-         # experiment: they both gave me the first number on the veriables list
-    8. `category = "Confections"`, then `len(category)`. `len` counted five things a moment ago. What is it counting now?
+         # experiment: they both gave me thefirst item from each list
+    4. `category = "Confections"`, then `len(category)`. `len` counted five things a moment ago. What is it counting now?
          # prediction: how many number are in all veriables listed in cells
          # experiment: how many number of letters are in 'Confections'
-    10. `sum(orders)`. It runs. Should it? # no it shouldn't run but i think python understands therefor it does run (correct input: 'total = sum(orders)' second line ('total'))
-    11. `orders * 2`, then `orders + freight_charges`. Neither one is an error.
+    5. `sum(orders)`. It runs. Should it? # no it shouldn't run but i think python understands therefor it does run (correct input: 'total = sum(orders)' second line ('total'))
+    6. `orders * 2`, then `orders + freight_charges`. Neither one is an error.
          # prediction: for 'orders * 2' it would mutiply all values inside list by 2
          # experiment: all number in list duplicated
          # prediction: 'orders + freight_charges' add both of them and list them
          # experiment: listed all values inside 'orders' and inside 'freight_charges' in one list
-    13. `sorted(freight_charges)`, then `sorted(freight_charges, reverse=True)`. What did `reverse=True` change, and did `freight_charges` itself change?
+    7. `sorted(freight_charges)`, then `sorted(freight_charges, reverse=True)`. What did `reverse=True` change, and did `freight_charges` itself change?
          # prediction: `sorted(freight_charges)` would sort them greatest to least and `sorted(freight_charges, reverse=True)` would do the oppsite
-         # experiment: `sorted(freight_charges)` sorted them greatest to least and `sorted(freight_charges, reverse=True)` would do the oppsite (lowest to greatest)
+         # experiment: `sorted(freight_charges)` sorted them (lowest to greatest) and `sorted(freight_charges, reverse=True)` would do the oppsite greatest to least
     """)
     return
 
