@@ -80,17 +80,48 @@ def _(mo):
 def _():
     # Your own example of each name.
 
-    # 1. value:
-    # 2. name and assignment:
-    # 3. type:
-    # 4. list:
-    # 5. index:
-    # 6. loop:
-    # 7. condition:
-    # 8. f-string:
-    # 9. many into one number:
-    # 10. function and argument:
-    # 11. error:
+    # 1. 17.5
+    # 2. avarage = sum (freight_charges)/len(freight_charges)
+    #      print(avarage)
+    # 3. 17.5 agianst "17.5"
+    # 4. [16.75,22.2,25.00,18.50,30.10]
+    # 5. freight_charges[10]
+    # 6. for x in freight_charges:
+    #      print(x)
+    # 7. Above_10=[]
+    #for charges in freight_charges:
+    #   if charges >= 10:
+    #       Above_10.append(charges)
+    #Above_10
+
+    # 8. print(f"My name is {name} and I am {age} years old.")
+    # 9. sum(freight_charges)
+    # 10. sorted(freight_charges, reverse=True)
+    # 11. A SyntaxError means Python doesn’t understand how your code is written because the grammar/structure is wrong.
+    return
+
+
+@app.cell
+def _(freight_charges):
+    avarage = sum (freight_charges)/len(freight_charges)
+    print(avarage)
+    return
+
+
+@app.cell
+def _(freight_charges):
+    Above_10=[]
+    for chargesss in freight_charges:
+        if chargesss >= 10:
+            Above_10.append(chargesss)
+    Above_10
+    return
+
+
+@app.cell
+def _(freight_charges):
+    for x in freight_charges:
+        print(x)
     return
 
 
@@ -115,6 +146,13 @@ def _():
     freight_charges=[16.75,22.2,25.00,18.50,30.10]
     freight_charges
     return (freight_charges,)
+
+
+@app.cell
+def _():
+    charges=[16.75,22.2,25.00,18.50,30.10]
+    charges
+    return (charges,)
 
 
 @app.cell
@@ -144,7 +182,7 @@ def _(freight_charges):
     for charges in freight_charges:
          if charges < 25: 
              print(charges)
-    return
+    return (charges,)
 
 
 @app.cell
@@ -203,9 +241,30 @@ def _(mo):
 
 
 @app.cell
-def _():
-    charges = [16.75, 22.25, 25.00, 20.25, 36.25]
-    charges
+def _(charges):
+    charges[0]
+    return
+
+
+@app.cell
+def _(charges):
+    charges[-1]
+    return
+
+
+@app.cell
+def _(charges):
+    charges[5]
+    return
+
+
+@app.cell
+def _(charges):
+    total = 0
+    for chargess in charges:
+        if chargess < 25:
+            total = total + chargess
+    total
     return
 
 
@@ -289,11 +348,29 @@ def _(mo):
 
 @app.cell
 def _():
-    score = 95
-    if score >= 60:
-        print("Pass")
-    elif score >= 90:
+    score = 75
+    if score >= 90:
         print("A")
+    elif score >= 60:
+        print("Pass")
+    return
+
+
+@app.cell
+def _():
+    # if a test atisfies two of these tests at once, python goes with the first test and prints the corresponding message
+    return
+
+
+@app.cell
+def _():
+    scores = 55
+    if scores >= 90:
+        print("A")
+    elif scores >= 60:
+        print("Pass")
+    elif scores <= 60:
+        print("Fail")
     return
 
 
@@ -319,8 +396,44 @@ def _(mo):
 
 @app.cell
 def _():
-    statuses = ["shipped", "pending", "shipped", "cancelled", "shipped"]
-    statuses
+    status = ["shipped", "pending", "shipped", "cancelled", "shipped"]
+    status
+    return (status,)
+
+
+@app.cell
+def _(status):
+    shipped_count = 0
+
+    for statuses in status:
+        if statuses == "shipped":
+            shipped_count += 1
+
+    print(shipped_count)
+    return (shipped_count,)
+
+
+@app.cell
+def _(status):
+    not_shipped_count = 0
+
+    for statusess in status:
+        if statusess != "shipped":
+            not_shipped_count += 1
+
+    print(not_shipped_count)
+    return
+
+
+@app.cell
+def _(shipped_count, status):
+    percentage_shipped_count = 0
+
+    for statusesss in status:
+        if statusesss == "shipped":
+            percentage_shipped_count += 1
+
+    print((shipped_count / len(status)) * 100)
     return
 
 
@@ -348,8 +461,25 @@ def _(mo):
 @app.cell
 def _():
     order_lines = ["notebook", "pen"]
-    order_lines.append(["stapler", "tape"])
+    order_lines.extend(["stapler", "tape"])
     len(order_lines)
+    return (order_lines,)
+
+
+@app.cell
+def _(order_lines):
+    order_lines[2] #1.[
+     # "stapler",
+     # "tape"
+    #]
+
+    #2. 'stapler'
+    return
+
+
+@app.cell
+def _():
+    # append adds exactly one item to a list, no matter what you give it.
     return
 
 
@@ -380,6 +510,18 @@ def _():
     print(sorted(tickers))
     print(tickers.sort())
     tickers
+    return (tickers,)
+
+
+@app.cell
+def _():
+    #`tickers.sort()` prints `None` because it changes the original list in place and does not return a new list, while `sorted(tickers)` returns a new sorted list.
+    return
+
+
+@app.cell
+def _(tickers):
+    print(sorted(tickers, reverse=True))
     return
 
 
@@ -413,9 +555,24 @@ def _(mo):
 @app.cell
 def _():
     prices = [12.50, 8.00, 19.99]
-    sale_prices = prices
+
+    sale_prices = prices[:]
+
     sale_prices.append(4.99)
+
     prices
+    return prices, sale_prices
+
+
+@app.cell
+def _(prices, sale_prices):
+    print(prices is sale_prices)
+    return
+
+
+@app.cell
+def _():
+    #You would want two names to refer to the same list when you want changes made through either name to affect the same data.
     return
 
 
@@ -443,7 +600,18 @@ def _(mo):
 @app.cell
 def _():
     print("100" + "50")
+
+    return
+
+
+@app.cell
+def _():
     print(100 + 50)
+    return
+
+
+@app.cell
+def _():
     return
 
 
