@@ -265,7 +265,7 @@ def _(charges):
         if chargess < 25:
             total = total + chargess
     total
-    return
+    return (total,)
 
 
 @app.cell
@@ -600,7 +600,6 @@ def _(mo):
 @app.cell
 def _():
     print("100" + "50")
-
     return
 
 
@@ -612,6 +611,13 @@ def _():
 
 @app.cell
 def _():
+    print(int("100.5"))
+    return
+
+
+@app.cell
+def _():
+    float("100.5")
     return
 
 
@@ -663,6 +669,18 @@ def _():
     return (first_order,)
 
 
+@app.cell
+def _(first_order):
+    first_order["ShipCountry"]
+    return
+
+
+@app.cell
+def _(first_order):
+    first_order["Freight"]
+    return
+
+
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
@@ -693,6 +711,24 @@ def _(mo):
     Two of them fail, and both give the same kind of error. Add a cell and find out
     which, and what the message says. A `KeyError` names the key it could not find.
     """)
+    return
+
+
+@app.cell
+def _(first_order):
+    first_order["Freight"] # retrun: 16.75
+    return
+
+
+@app.cell
+def _(first_order):
+    first_order["freight"]# This fail due to python being case sensative Freight was capitilized in the record and was not capitilized in this funtion. fix: first_order["Freight"] KeyError: 'freight' 
+    return
+
+
+@app.cell
+def _(first_order):
+    first_order[0] # A list is read by position, charges[0]. A record is read by name. KeyError: 0. Fails because records are read by key/name, not by position. There is no key named 0
     return
 
 
@@ -785,6 +821,32 @@ def _(mo):
     return
 
 
+@app.cell
+def _(orders):
+    sum(order["Freight"] for order in orders)  # adds the freight from every order retrun: 827.0
+    return
+
+
+@app.cell
+def _(orders):
+    sum(order["ShippedDate"] is None for order in orders) # counts how many orders were not shipped. Return: 3
+    return
+
+
+@app.cell
+def _(orders):
+    max(orders, key=lambda order: order["Freight"])   # finds the order with the largest freight. Return: {
+     # "OrderID": 10263,
+    #  "CustomerID": "ERNSH",
+    #  "ShipCountry": "Austria",
+    #  "ShipCity": "Graz",
+    #  "OrderDate": "2016-07-23",
+    #  "ShippedDate": "2016-07-31",
+    #  "Freight": 56.0
+    #}
+    return
+
+
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
@@ -807,8 +869,7 @@ def _(mo):
     mo.md(r"""
     *One row is ...*
 
-    *(Replace this line with your own sentence. If this cell shows you code instead of
-    text, use the cell menu to turn it into a markdown cell.)*
+    *(One row is one customer order, containing all the information about that single order.)*
     """)
     return
 
@@ -846,6 +907,57 @@ def _():
         {"Symbol": "TSLA", "Shares": 150, "Price": 255.70},
     ]
     portfolio
+    return (portfolio,)
+
+
+@app.cell
+def _(portfolio):
+    total = 0
+
+    for holdings in portfolio:
+        total = total + holdings["Shares"] * holdings["Price"]
+
+    print(total)
+    return (total,)
+
+
+@app.cell
+def _(portfolio):
+    total_cost = 0
+
+    for holding in portfolio:
+        total_cost = total_cost + holding["Shares"] * holding["Price"]
+
+    print(total_cost)
+    return (holding,)
+
+
+@app.cell
+def _(holding):
+    total = total + holding["Shares"] * holding["Price"] #it redefines variables from other cells. It multiplies the number of shares by the price for each holding, then adds that amount to the running total.
+    return (total,)
+
+
+@app.cell
+def _():
+    portfolios = [
+        {"Symbol": "AAPL", "Shares": 12, "Price": 35},
+        {"Symbol": "MSFT", "Shares": 25, "Price": 18},
+        {"Symbol": "GOOG", "Shares": 8, "Price": 120},
+        {"Symbol": "AMZN", "Shares": 15, "Price": 42},
+    ]
+    portfolios
+    return (portfolios,)
+
+
+@app.cell
+def _(portfolios):
+    totals = 0
+
+    for holdingss in portfolios:
+        totals = totals + holdingss["Shares"] * holdingss["Price"]
+
+    print(totals)
     return
 
 
@@ -897,6 +1009,53 @@ def _(mo):
         _where = f"could not write into {_data_dir.name}/: {_error}"
 
     _where
+    return (portfolio_csv,)
+
+
+@app.cell
+def _(portfolio_csv):
+    # Reading a file is new: open(...) opens it, and "with" closes it again
+    # automatically when the block below it finishes, even if something goes wrong.
+
+    with open(portfolio_csv) as file:
+        file_lines = file.readlines()
+
+    file_total = 0
+    print(f"{'name':<8}{'shares':>8}{'price':>10}")
+
+    # file_lines[0] is the header row ("name,shares,price"), so skip it with [1:].
+    for line in file_lines[1:]:
+        # Each line ends with \n (a newline character); strip() removes it.
+        # split(",") breaks "AAPL,100,173.93" into ["AAPL", "100", "173.93"].
+        name, shares_text, price_text = line.strip().split(",")
+        shares = int(shares_text)
+        price = float(price_text)
+        print(f"{name:<8}{shares:>8}{price:>10.2f}")
+        file_total = file_total + shares * price
+
+    print(f"Total cost: ${file_total:.2f}") #AAPL 100 173.93 17393.0
+    #MSFT 50 319.53 15976.499999999998
+    #GOOG 80 131.36 10508.800000000001
+    #AMZN 200 129.33 25866.000000000004
+    #NVDA 20 410.17 8203.4
+    #TSLA 150 255.7 38355.0
+    #Total cost: $116302.70
+    return
+
+
+@app.cell
+def _():
+    #Lines you have not met, explained:
+
+    #with open("data/portfolio.csv") as file: — opens the file and names it file. The with closes it automatically when the block ends. This is file-reading, which you have not met.
+    #file.readlines() — reads every line of the file into a list of strings, one string per line, including the header line.
+    #lines[1:] — an index range, same idea as charges[1:5] you've already done, here used to skip the header row.
+    #line.strip() — removes the invisible newline character at the end of each line.
+    #.split(",") — breaks one line of text into a list of pieces, cutting at each comma. "AAPL,100,173.93" becomes ["AAPL", "100", "173.93"].
+    #int(parts[1]) and float(parts[2]) — everything read from a file arrives as text, even numbers, so these convert the share count and price back into real numbers you can do arithmetic on.
+    #No rows were skipped and no values were silently dropped — the only conversion is turning text into numbers for shares and price, which the code does explicitly for all 6 rows.
+
+    #Concepts used: a value, a name, assignment, the four basic types, a list, indexing (the [1:] range), a loop, a running total, calling a function with arguments (open, int, float), an f-string, and reading a file (new).
     return
 
 
