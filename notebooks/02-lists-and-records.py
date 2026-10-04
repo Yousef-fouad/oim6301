@@ -265,7 +265,7 @@ def _(charges):
         if chargess < 25:
             total = total + chargess
     total
-    return (total,)
+    return
 
 
 @app.cell
@@ -313,13 +313,13 @@ def _(mo):
     it, write under the letter, and press `Ctrl+Enter`. Code still goes in cells of your
     own, added with the **+** button.
 
-    **A ·**
+    A · If a test satisfies two of these tests at once, Python goes with the first test and prints the corresponding message.
 
-    **C ·**
+    C · Append adds exactly one item to a list, no matter what you give it.
 
-    **D ·**
+    D · tickers.sort() prints None because it changes the original list in place and does not return a new list, while sorted(tickers) returns a new sorted list.
 
-    **E ·**
+    E · You would want two names to refer to the same list when you want changes made through either name to affect the same data.
     """)
     return
 
@@ -370,6 +370,30 @@ def _():
     elif scores >= 60:
         print("Pass")
     elif scores <= 60:
+        print("Fail")
+    return
+
+
+@app.cell
+def _():
+    scoress = 95
+    if scoress >= 90:
+        print("A")
+    elif scoress >= 60:
+        print("Pass")
+    elif scoress <= 60:
+        print("Fail")
+    return
+
+
+@app.cell
+def _():
+    scoresss = 60
+    if scoresss >= 90:
+        print("A")
+    elif scoresss >= 60:
+        print("Pass")
+    elif scoresss <= 60:
         print("Fail")
     return
 
@@ -560,13 +584,25 @@ def _():
 
     sale_prices.append(4.99)
 
-    prices
+    print(prices)
     return prices, sale_prices
 
 
 @app.cell
 def _(prices, sale_prices):
     print(prices is sale_prices)
+    return
+
+
+@app.cell
+def _(prices, sale_prices):
+    discounted_prices = []
+
+    for price in sale_prices:
+        discounted_prices.append(round(price * 0.90, 2))
+
+    print(discounted_prices)
+    print(prices)
     return
 
 
@@ -822,6 +858,12 @@ def _(mo):
 
 
 @app.cell
+def _():
+    #The three orders with no ShippedDate are all from 2018, while the other 27 orders are from 2016.
+    return
+
+
+@app.cell
 def _(orders):
     sum(order["Freight"] for order in orders)  # adds the freight from every order retrun: 827.0
     return
@@ -911,6 +953,12 @@ def _():
 
 
 @app.cell
+def _():
+    # For each holding, i would multiply the number of shares of each company by the corresponding share price, making a loop and adding to the running total as I go. The final total is the cost of the whole portfolio.
+    return
+
+
+@app.cell
 def _(portfolio):
     total = 0
 
@@ -918,7 +966,7 @@ def _(portfolio):
         total = total + holdings["Shares"] * holdings["Price"]
 
     print(total)
-    return (total,)
+    return
 
 
 @app.cell
@@ -929,13 +977,7 @@ def _(portfolio):
         total_cost = total_cost + holding["Shares"] * holding["Price"]
 
     print(total_cost)
-    return (holding,)
-
-
-@app.cell
-def _(holding):
-    total = total + holding["Shares"] * holding["Price"] #it redefines variables from other cells. It multiplies the number of shares by the price for each holding, then adds that amount to the running total.
-    return (total,)
+    return
 
 
 @app.cell
