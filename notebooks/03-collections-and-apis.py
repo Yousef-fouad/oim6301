@@ -16,6 +16,21 @@ app = marimo.App(width="medium", sql_output="polars")
 
 @app.cell
 def _():
+    bmi = 27
+    if bmi >= 18.5:
+        category = "Normal"
+    elif bmi >= 25:
+        category = "Overweight"
+    elif bmi >= 30:
+        category = "Obese"
+    else:
+        category = "Underweight"
+    print(category)
+    return
+
+
+@app.cell
+def _():
     import marimo as mo
 
     return (mo,)
@@ -484,6 +499,11 @@ def _():
 
 
 @app.cell
+def _():
+    return
+
+
+@app.cell
 def _(mo):
     mo.md(r"""
     > **Advanced · A year of trades.** A client made the trades below this year, one tuple per trade: date, ticker, `"buy"` or `"sell"`, shares, price. When the client sells, which of the shares bought earlier were the ones sold? The usual rule is **first in, first out**: a sale uses up the oldest shares first. Selling 120 AAPL on April 15 uses the 100 bought in January, then 20 of the 50 bought in March.
@@ -548,6 +568,7 @@ def _(requests):
             "&temperature_unit=fahrenheit&wind_speed_unit=mph"
             "&timezone=America/New_York"
         )
+    print(babson_url)
     babson_reply = requests.get(babson_url, timeout=10)
     babson_reply.status_code
     return (babson_reply,)
@@ -665,6 +686,15 @@ def _(mo):
     # 6. ✏️ Your Turn
     **E · The wind in a sentence.** Add a cell that takes the wind speed and its unit out of `babson_weather` and puts both into one sentence with an f-string. *Check yourself: the unit reads `mp/h`, which is how this service writes miles per hour.*
     """)
+    return
+
+
+@app.cell
+def _(babson_weather):
+    wind_speed = babson_weather["current"]["wind_speed_10m"]
+    wind_unit = babson_weather["current_units"]["wind_speed_10m"]
+
+    print(f"The wind speed at Babson is {wind_speed} {wind_unit}.")
     return
 
 
