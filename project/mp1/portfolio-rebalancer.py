@@ -37,7 +37,15 @@ def _(mo):
     mo.md(r"""
     ## 1. The Question
 
-    *Who would use this, and what decision does it help them make? Two or three sentences, in words somebody outside this course would understand.*
+    *This tool is designed for investors or financial advisors who want to keep their portfolios balanced. Since stock prices change over time, the percentage invested in each stock can move away from the original target. This tool will calculate how many shares need to be bought or sold to get the portfolio closer to its target weights.
+
+    Who? An investor or financial advisor managing a stock portfolio.
+
+    What's the problem? Stock prices change, causing the portfolio percentages to move away from their targets.
+
+    What's the decision? How many shares of each stock should be bought or sold to get closer to the target percentages.
+
+    *
     """)
     return
 
@@ -49,11 +57,29 @@ def _(mo):
 
     *Before you ask your agent anything, write how you would solve it: the steps, in order, in plain words, in five lines or more. Then answer these two questions:*
 
-    - *What does your loop carry from one step to the next, the way a running total carries its sum?*
-    - *Which check will you use in section 6, and which two numbers should agree?*
+    - *First, I will calculate the total value of the portfolio by multiplying the number of shares by their prices and adding the $5,000 cash.
 
-    *Commit this notebook with the message `mp1: plan before AI`.*
+    Next, I will use the target percentages to calculate how much money should be invested in each stock.
+
+    Then, I will divide each target amount by the stock's price to find how many whole shares the investor should own.
+
+    After that, I will compare the current shares with the target shares to determine how many shares need to be bought or sold.
+
+    Finally, I will calculate the remaining cash, find the new percentage of each stock, and print a table showing the results.
+
+    What does my loop carry from one step to the next?
+
+    My loop will go through each stock and keep track of the total portfolio value. I will also use a running calculation to track how much cash remains after buying and selling shares.
+
+    Which check will I use in Section 6, and which two numbers should agree?
+
+    I will calculate the total portfolio value before and after rebalancing. Both values should be the same because buying and selling stocks does not change the total value of the portfolio when there are no trading fees.*
     """)
+    return
+
+
+@app.cell
+def _():
     return
 
 
