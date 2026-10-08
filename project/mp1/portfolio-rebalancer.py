@@ -186,7 +186,30 @@ def _(cash, holdings, shares_to_trade):
         cash_left = cash_left - (_trade * _price)
 
     print(f"Cash remaining: ${cash_left:,.2f}")
-    return
+    return (cash_left,)
+
+
+@app.cell
+def _(holdings, target_shares, target_weights, total_value):
+    new_values = {}
+    new_weights = {}
+    weight_gaps = {}
+
+    for _stock in holdings:
+        _ticker = _stock[0]
+        _price = _stock[2]
+        _shares = target_shares[_ticker]
+
+        _value = _shares * _price
+        _weight = _value / total_value
+        _gap = (_weight - target_weights[_ticker]) * 100
+
+        new_values[_ticker] = _value
+        new_weights[_ticker] = _weight
+        weight_gaps[_ticker] = _gap
+
+        print(f"{_ticker}: {_weight * 100:.2f}% (Difference: {_gap:+.2f} points)")
+    return new_values, new_weights, weight_gaps
 
 
 @app.cell(hide_code=True)
@@ -200,7 +223,31 @@ def _(mo):
 
 
 @app.cell
+def _(
+    cash_left,
+    holdings,
+    new_values,
+    new_weights,
+    shares_to_trade,
+    target_shares,
+    weight_gaps,
+):
+    print(f"{'Ticker':<8} {'Now':>7} {'Target':>8} {'Trade':>8} {'Value After':>15} {'Weight':>9} {'Gap':>10}")
+    print("-" * 75)
+
+    for _stock in holdings:
+        _ticker = _stock[0]
+
+        print(f"{_ticker:<8} {_stock[1]:>7} {target_shares[_ticker]:>8} {shares_to_trade[_ticker]:>+8} ${new_values[_ticker]:>14,.2f} {new_weights[_ticker]*100:>8.2f}% {weight_gaps[_ticker]:>+9.2f}")
+
+    print("-" * 75)
+    print(f"Cash remaining: ${cash_left:,.2f}")
+    return
+
+
+@app.cell
 def _():
+    # The portfolio can be brought close to its target weights by buying and selling the calculated number of shares, with all six stocks ending within 0.24 percentage points of their targets and $725.62 remaining in cash.
     return
 
 
