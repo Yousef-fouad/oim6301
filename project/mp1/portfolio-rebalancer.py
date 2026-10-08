@@ -98,7 +98,26 @@ def _(mo):
 @app.cell
 def _():
     # Your inputs.
-    return
+    holdings = [
+        ("AAPL", 100, 173.93),
+        ("MSFT", 50, 319.53),
+        ("GOOG", 80, 131.36),
+        ("AMZN", 200, 129.33),
+        ("NVDA", 20, 410.17),
+        ("TSLA", 150, 255.70),
+    ]
+
+    cash = 5000.00
+
+    target_weights = {
+        "AAPL": 0.20,
+        "MSFT": 0.20,
+        "GOOG": 0.15,
+        "AMZN": 0.15,
+        "NVDA": 0.15,
+        "TSLA": 0.15
+    }
+    return cash, holdings, target_weights
 
 
 @app.cell(hide_code=True)
@@ -112,7 +131,61 @@ def _(mo):
 
 
 @app.cell
-def _():
+def _(cash, holdings):
+    total_value = cash
+
+    for stock in holdings:
+        stock_value = stock[1] * stock[2]
+        total_value = total_value + stock_value
+
+    print(f"Total portfolio value: ${total_value:,.2f}")
+    return (total_value,)
+
+
+@app.cell
+def _(holdings, target_weights, total_value):
+    target_shares = {}
+
+    for _holding in holdings:
+        _ticker = _holding[0]
+        _price = _holding[2]
+        _target_amount = total_value * target_weights[_ticker]
+        _shares = int(_target_amount // _price)
+
+        target_shares[_ticker] = _shares
+
+    print(target_shares)
+    return (target_shares,)
+
+
+@app.cell
+def _(holdings, target_shares):
+    shares_to_trade = {}
+
+    for _stock in holdings:
+        _ticker = _stock[0]
+        _current_shares = _stock[1]
+        _difference = target_shares[_ticker] - _current_shares
+
+        shares_to_trade[_ticker] = _difference
+
+    print(shares_to_trade)
+
+    return (shares_to_trade,)
+
+
+@app.cell
+def _(cash, holdings, shares_to_trade):
+    cash_left = cash
+
+    for _stock in holdings:
+        _ticker = _stock[0]
+        _price = _stock[2]
+        _trade = shares_to_trade[_ticker]
+
+        cash_left = cash_left - (_trade * _price)
+
+    print(f"Cash remaining: ${cash_left:,.2f}")
     return
 
 
