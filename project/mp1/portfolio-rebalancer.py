@@ -98,6 +98,8 @@ def _(mo):
 @app.cell
 def _():
     # Your inputs.
+    # Your inputs.
+
     holdings = [
         ("AAPL", 100, 173.93),
         ("MSFT", 50, 319.53),
@@ -117,7 +119,10 @@ def _():
         "NVDA": 0.15,
         "TSLA": 0.15
     }
-    return cash, holdings, target_weights
+
+    trading_fee = 5
+    minimum_trade = 500
+    return cash, holdings, minimum_trade, target_weights, trading_fee
 
 
 @app.cell(hide_code=True)
@@ -217,7 +222,7 @@ def _(mo):
     mo.md(r"""
     ## 5. The Answer
 
-    *A table of your results in the cell below, printed with `print` and f-strings, then one sentence here that answers the question in section 1, with the number in it.*
+    *The portfolio can be brought close to its target weights by buying and selling the calculated number of shares, with all six stocks ending within 0.24 percentage points of their targets and $725.62 remaining in cash.*
     """)
     return
 
@@ -245,24 +250,30 @@ def _(
     return
 
 
-@app.cell
-def _():
-    # The portfolio can be brought close to its target weights by buying and selling the calculated number of shares, with all six stocks ending within 0.24 percentage points of their targets and $725.62 remaining in cash.
-    return
-
-
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
     ## 6. How I Know These Numbers Are Right
 
-    *At least one check that reaches a result a second, independent way. Name what you compared and what came out.*
+    *To check my results, I calculated the portfolio's total value a second way using the new number of shares for each stock and the remaining cash. The original portfolio value was $121,302.70, and the value after rebalancing was also $121,302.70. The difference was $0.00, which shows that no money was lost or added during the trades.*
     """)
     return
 
 
 @app.cell
-def _():
+def _(cash_left, holdings, target_shares, total_value):
+    total_after = cash_left
+
+    for _stock in holdings:
+        _ticker = _stock[0]
+        _price = _stock[2]
+        _shares = target_shares[_ticker]
+
+        total_after = total_after + (_shares * _price)
+
+    print(f"Value before: ${total_value:,.2f}")
+    print(f"Value after: ${total_after:,.2f}")
+    print(f"Difference: ${total_value - total_after:.2f}")
     return
 
 
@@ -271,9 +282,9 @@ def _(mo):
     mo.md(r"""
     ## 7. Working With the Agent
 
-    *Pick one piece of AI output you did not accept as-is. What did it give you, what did you change, and how did you know? Point to the commit or the cell.*
+    While working on Section 4, AI suggested using dictionary comprehensions to separate the stocks being bought and sold. I decided not to use this approach because it was more complicated than what we learned in class. Instead, I kept the simpler for loop to calculate how many shares needed to be bought or sold.
 
-    *If the agent got it right the first time: what did you do to verify that?*
+    I verified my results by checking the shares_to_trade cell in Section 4 and comparing the current shares with the target shares. I also checked in Section 6 that the portfolio value before and after rebalancing was $121,302.70, with a difference of $0.00.
     """)
     return
 
@@ -283,8 +294,60 @@ def _(mo):
     mo.md(r"""
     ## 8. Going Further
 
-    *Take at least one step past the main task, in any direction, and use your agent as much as you like. It does not have to work. State what you tried, what you found, and where it is in this notebook.*
+    For Going Further, I added a $5 trading fee and a rule to skip trades worth less than $500. All six trades were completed, resulting in $30 in fees. The remaining cash was $695.62, and the portfolio value decreased to $121,272.70. The stocks were still close to their target weights, with the largest difference being 0.24 percentage points.
     """)
+    return
+
+
+@app.cell
+def _(cash, holdings, minimum_trade, shares_to_trade, trading_fee):
+    extra_cash = cash
+    extra_shares = {}
+    trades_made = 0
+
+    for _stock in holdings:
+        _ticker = _stock[0]
+        _price = _stock[2]
+        _current_shares = _stock[1]
+        _trade = shares_to_trade[_ticker]
+
+        _trade_value = abs(_trade * _price)
+
+        if _trade_value >= minimum_trade:
+            extra_cash = extra_cash - (_trade * _price) - trading_fee
+            extra_shares[_ticker] = _current_shares + _trade
+            trades_made = trades_made + 1
+        else:
+            extra_shares[_ticker] = _current_shares
+
+    print(f"Trades made: {trades_made}")
+    print(f"Trading fees: ${trades_made * trading_fee:.2f}")
+    print(f"Cash remaining with fees: ${extra_cash:,.2f}")
+    return extra_cash, extra_shares
+
+
+@app.cell
+def _(extra_cash, extra_shares, holdings, target_weights):
+    total_with_fees = extra_cash
+
+    for _stock in holdings:
+        _ticker = _stock[0]
+        _price = _stock[2]
+
+        total_with_fees = total_with_fees + extra_shares[_ticker] * _price
+
+    print(f"Portfolio value after fees: ${total_with_fees:,.2f}")
+
+    for _stock in holdings:
+        _ticker = _stock[0]
+        _price = _stock[2]
+
+        _value = extra_shares[_ticker] * _price
+        _weight = (_value / total_with_fees) * 100
+        _target = target_weights[_ticker] * 100
+        _difference = _weight - _target
+
+        print(f"{_ticker}: {_weight:.2f}% (Difference: {_difference:+.2f} points)")
     return
 
 
