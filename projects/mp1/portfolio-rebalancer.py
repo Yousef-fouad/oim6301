@@ -57,23 +57,23 @@ def _(mo):
 
     *Before you ask your agent anything, write how you would solve it: the steps, in order, in plain words, in five lines or more. Then answer these two questions:*
 
-    - *First, I will calculate the total value of the portfolio by multiplying the number of shares by their prices and adding the $5,000 cash.
+    1. I will calculate the total value of my portfolio by multiplying each price by its corresponding shares, and then I will sum it up by adding the available cash.
 
-    Next, I will use the target percentages to calculate how much money should be invested in each stock.
+    2. amounts should be equal due to the fact that buying and selling shares do. I will use the percentages to figure out how much money is needed to be invested in each stock.
 
-    Then, I will divide each target amount by the stock's price to find how many whole shares the investor should own.
+    3. I will compute how many shares of each stock our investor should have invested.
 
-    After that, I will compare the current shares with the target shares to determine how many shares need to be bought or sold.
+    4. I will compare the current holding with the new number of shares that I computed to determine if the stocks need to be bought or sold.
 
-    Finally, I will calculate the remaining cash, find the new percentage of each stock, and print a table showing the results.
+    5. I will finalize my project by calculating the remaining cash and each stock's new percentages so the results can be displayed in a table.
 
     What does my loop carry from one step to the next?
 
-    My loop will go through each stock and keep track of the total portfolio value. I will also use a running calculation to track how much cash remains after buying and selling shares.
+    My loop will go through each and every stock. It will keep adding the values of each of those stocks and computing the total value of the portfolio. Another loop will update the cash total as shares are bought and sold.
 
     Which check will I use in Section 6, and which two numbers should agree?
 
-    I will calculate the total portfolio value before and after rebalancing. Both values should be the same because buying and selling stocks does not change the total value of the portfolio when there are no trading fees.*
+    I will calculate the portfolio's value before and after the rebalancing process. The 2 amounts should be equal due to the fact that buying and selling shares does not change the total value of the given portfolio, especially when we have no extra charges for transaction fees.
     """)
     return
 
@@ -175,7 +175,6 @@ def _(holdings, target_shares):
         shares_to_trade[_ticker] = _difference
 
     print(shares_to_trade)
-
     return (shares_to_trade,)
 
 
