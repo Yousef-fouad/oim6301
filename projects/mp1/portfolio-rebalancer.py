@@ -98,7 +98,6 @@ def _(mo):
 @app.cell
 def _():
     # Your inputs.
-    # Your inputs.
 
     holdings = [
         ("AAPL", 100, 173.93),
