@@ -15,13 +15,14 @@ def classify_bmi(bmi):
 
 # Calculate BMI
 def compute_bmi(height, weight):
+    height = height / 100
     bmi = weight / (height ** 2)
     return bmi
 
 
 # Main function
 def main():
-    height = float(input("Enter your height in meters: "))
+    height = float(input("Enter your height in centimeters: "))
     weight = float(input("Enter your weight in kilograms: "))
 
     bmi = compute_bmi(height, weight)
@@ -30,6 +31,6 @@ def main():
     print(f"Your BMI is {bmi:.2f}, {category}")
 
 
-# Run the program
 main()
+
 
