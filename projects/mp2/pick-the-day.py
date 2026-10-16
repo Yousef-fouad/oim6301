@@ -322,7 +322,7 @@ def _(check_weather, weather_limits, weather_records):
     recommended_day = find_best_day(weather_records, weather_limits)
 
     print(recommended_day)
-    return
+    return (recommended_day,)
 
 
 @app.cell
@@ -378,6 +378,69 @@ def _(mo):
     return
 
 
+@app.cell
+def _(check_weather, weather_limits, weather_records):
+    print(f"{'Date':<12}{'High (F)':>11}{'Low (F)':>11}{'Rain (%)':>11}{'Wind (mph)':>12}{'Pass?':>10}")
+    print("-" * 67)
+
+    for _day in weather_records:
+        _passes, _broken = check_weather(_day, weather_limits)
+
+        if _passes:
+            _status = "Yes"
+        else:
+            _status = "No"
+
+        print(f"{_day['date']:<12}{_day['high_f']:>11.1f}{_day['low_f']:>11.1f}{_day['rain_chance']:>11}{_day['wind_mph']:>12.1f}{_status:>10}")
+    return
+
+
+@app.cell
+def _(check_weather, place, recommended_day, state, weather_limits):
+    _best_passes, _best_broken = check_weather(recommended_day, weather_limits)
+
+    if _best_passes:
+        print(f"The best day for an outdoor event in {place}, {state} is {recommended_day['date']}, with a high temperature of {recommended_day['high_f']}°F, a {recommended_day['rain_chance']}% chance of rain, and wind speeds of {recommended_day['wind_mph']} mph. It meets all weather requirements and has the best combination of rain probability and wind speed among qualifying days.")
+    else:
+        print(f"No day meets all weather requirements in {place}, {state}. The best alternative is {recommended_day['date']}, with a high temperature of {recommended_day['high_f']}°F, a {recommended_day['rain_chance']}% chance of rain, and wind speeds of {recommended_day['wind_mph']} mph. It breaks {_best_broken} weather rule(s), the fewest among the seven days.")
+    return
+
+
+@app.cell
+def _(
+    check_weather,
+    highest_high_f,
+    lowest_high_f,
+    max_rain_chance,
+    max_wind_mph,
+    recommended_day,
+    weather_limits,
+):
+    # Result from the main function
+    main_broken = check_weather(recommended_day, weather_limits)[1]
+
+    # Independent calculation
+    independent_broken = 0
+
+    if recommended_day["high_f"] < lowest_high_f:
+        independent_broken += 1
+
+    if recommended_day["high_f"] > highest_high_f:
+        independent_broken += 1
+
+    if recommended_day["rain_chance"] > max_rain_chance:
+        independent_broken += 1
+
+    if recommended_day["wind_mph"] > max_wind_mph:
+        independent_broken += 1
+
+    # Compare both results
+    print("Main function - broken rules:", main_broken)
+    print("Independent check - broken rules:", independent_broken)
+    print("Do they agree?", main_broken == independent_broken)
+    return
+
+
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
@@ -389,19 +452,19 @@ def _(mo):
 
     **My verification:**
 
-    [Explain which result you checked.]
+    I independently checked whether my recommended day, which is October 19, 2026, satisfied all four limits that were set up. I used a separate if statement to count the broken rules without calling my original function.
 
     **Result from the main program:**
 
-    [Record the first result.]
+    0 broken rules.
 
     **Result from the independent check:**
 
-    [Record the second result.]
+    0 broken rules.
 
     **Do they agree?**
 
-    [Explain what you found.]
+    Yes, both methods returned with 0 broken rules. This confirmed my assumption on top and made sure they adhered to my limits.
     """)
     return
 
