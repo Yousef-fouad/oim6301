@@ -134,7 +134,14 @@ def _():
 
     max_rain_chance = 30
     max_wind_mph = 15
-    return place, state
+    return (
+        highest_high_f,
+        lowest_high_f,
+        max_rain_chance,
+        max_wind_mph,
+        place,
+        state,
+    )
 
 
 @app.cell(hide_code=True)
@@ -234,6 +241,109 @@ def _(find_coordinates, place, requests, state):
     print("Number of days:", len(weather_records))
     print("First day:", weather_records[0])
     print("Last day:", weather_records[-1])
+    return (weather_records,)
+
+
+@app.cell
+def _(
+    highest_high_f,
+    lowest_high_f,
+    max_rain_chance,
+    max_wind_mph,
+    weather_records,
+):
+    def check_weather(day, limits):
+        broken_rules = 0
+
+        if day["high_f"] < limits["lowest_high_f"]:
+            broken_rules += 1
+
+        if day["high_f"] > limits["highest_high_f"]:
+            broken_rules += 1
+
+        if day["rain_chance"] > limits["max_rain_chance"]:
+            broken_rules += 1
+
+        if day["wind_mph"] > limits["max_wind_mph"]:
+            broken_rules += 1
+
+        passes = broken_rules == 0
+
+        return passes, broken_rules
+
+
+    weather_limits = {
+        "lowest_high_f": lowest_high_f,
+        "highest_high_f": highest_high_f,
+        "max_rain_chance": max_rain_chance,
+        "max_wind_mph": max_wind_mph
+    }
+
+    print(check_weather(weather_records[0], weather_limits))
+    return check_weather, weather_limits
+
+
+@app.cell
+def _(check_weather, weather_limits, weather_records):
+    def find_best_day(records, limits):
+        good_days = []
+
+        for _day in records:
+            passes, broken_rules = check_weather(_day, limits)
+
+            if passes:
+                good_days.append(_day)
+
+        if len(good_days) > 0:
+            best_day = good_days[0]
+
+            for _day in good_days:
+                if _day["rain_chance"] < best_day["rain_chance"]:
+                    best_day = _day
+
+                elif _day["rain_chance"] == best_day["rain_chance"]:
+                    if _day["wind_mph"] < best_day["wind_mph"]:
+                        best_day = _day
+
+        else:
+            best_day = records[0]
+            best_broken = check_weather(best_day, limits)[1]
+
+            for _day in records:
+                passes, broken_rules = check_weather(_day, limits)
+
+                if broken_rules < best_broken:
+                    best_day = _day
+                    best_broken = broken_rules
+
+        return best_day
+
+
+    recommended_day = find_best_day(weather_records, weather_limits)
+
+    print(recommended_day)
+    return
+
+
+@app.cell
+def _(check_weather, weather_limits, weather_records):
+    for _day in weather_records:
+        _passes, _broken = check_weather(_day, weather_limits)
+        print(_day["date"], _passes, _day["rain_chance"], _day["wind_mph"])
+    return
+
+
+@app.cell
+def _(weather_records):
+    import json
+    import os
+
+    os.makedirs("projects/mp2/data", exist_ok=True)
+
+    with open("projects/mp2/data/weather_records.json", "w") as _file:
+        json.dump(weather_records, _file, indent=4)
+
+    print("Saved", len(weather_records), "weather records.")
     return
 
 
