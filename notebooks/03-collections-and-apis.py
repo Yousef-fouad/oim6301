@@ -462,11 +462,16 @@ def _(mo):
     mo.md(r"""
     ## ✏️ C · Which structure
     **In the written answers cell**, name the structure for each, with one reason:
-    1. The lines on one order, which the customer can add to, remove from and reorder
-    2. Every customer who has ordered from you this year, each once
-    3. The units sold of each product, looked up by product name
-    4. One shipment's carrier, tracking number and ship date, which must not change once recorded
+    1. The lines on one order, which the customer can add to, remove from and reorder: List, because customers can add, remove, and reorder items.
+    2. Every customer who has ordered from you this year, each once: Set, because it stores each customer only once and prevents duplicates.
+    3. The units sold of each product, looked up by product name: Dictionary, because it lets us look up the units sold using the product name as a key.
+    4. One shipment's carrier, tracking number and ship date, which must not change once recorded: Tuple, because it stores shipment information that cannot be changed once recorded.
     """)
+    return
+
+
+@app.cell
+def _():
     return
 
 
@@ -475,12 +480,24 @@ def _(mo):
     mo.md(r"""
     ## ✏️ D · The portfolio again
     Notebook 2 held the six holdings as a list of dictionaries. Here they are as a list of tuples, one holding per tuple.
-    1. **By hand, no agent.** In the written answers cell, state which of the two shapes you would rather work with for this question, and why.
+    1. **By hand, no agent.** In the written answers cell, state which of the two shapes you would rather work with for this question, and why. : I would prefer a list of tuples because each holding contains the same three pieces of information: number of shares, price, and the stock symbol. Tuples make it easier for me to seperate these values in a loop using 'for' and calculate portfolio cost.
     2. **Add a cell** that computes what it costs to buy the whole portfolio. Unpack each holding into three names in the `for` line, and start each name with an underscore: `for _symbol, _shares, _price in holdings:`.
     3. **Then ask your agent** for its version, and ask it to explain the line you would not have written.
     *Check yourself: $116,302.70, the same as notebook 2.*
     **Going further.** Which holding cost the most? Build a dictionary from ticker to cost, then find the largest. *TSLA, $38,355.00.*
     """)
+    return
+
+
+@app.cell
+def _(holdings):
+    total_cost = 0
+
+    for _symbol, _shares, _price in holdings:
+        stock_cost = _shares * _price
+        total_cost = total_cost + stock_cost
+
+    print(round(total_cost, 2))
     return
 
 
@@ -495,11 +512,25 @@ def _():
             ("TSLA", 150, 255.70),
     ]
     holdings
-    return
+    return (holdings,)
 
 
 @app.cell
-def _():
+def _(holdings):
+    cost_by_ticker = {}
+
+    for _symbol, _shares, _price in holdings:
+        cost_by_ticker[_symbol] = _shares * _price
+
+    largest_ticker = ""
+    largest_cost = 0
+
+    for _ticker, _cost in cost_by_ticker.items():
+        if _cost > largest_cost:
+            largest_cost = _cost
+            largest_ticker = _ticker
+
+    print(f"{largest_ticker}: ${largest_cost:,.2f}")
     return
 
 
@@ -508,18 +539,21 @@ def _(mo):
     mo.md(r"""
     > **Advanced · A year of trades.** A client made the trades below this year, one tuple per trade: date, ticker, `"buy"` or `"sell"`, shares, price. When the client sells, which of the shares bought earlier were the ones sold? The usual rule is **first in, first out**: a sale uses up the oldest shares first. Selling 120 AAPL on April 15 uses the 100 bought in January, then 20 of the 50 bought in March.
     >
-    > 1. **By hand, no agent.** In the written answers cell, write the algorithm in words: what you keep for each ticker, and what happens to it on a sale.
+    > 1. **By hand, no agent.** In the written answers cell, write the algorithm in words: what you keep for each ticker, and what happens to it on a sale.: For each stock, I would track the purchased shares, the order they were bought in and their purchased prices. when shares are sold I would use the first in first out method meaning the oldest purchased shares first. If someone bought only part of a share, I would keep the remaining shares in the portfolio. I would calculate our profit by subtracting the original cost of the shares sold from the amount received from selling them.
+
+
     > 2. **Then work it out with your agent**, and keep going until you can explain every line.
     > 3. Find the gain on each sale, the total, and the shares left.
     >
     > *Check yourself: gains of $7,900.00 in all, $6,700.00 on AAPL and $1,200.00 on MSFT. Left: 20 AAPL bought at $240.00, and 10 MSFT at $380.00.*
     >
     > **Going further.** Work it out again with **average cost**, where a sale uses the average price of every share held. The total changes. Which rule would the client rather report this year, and why?
+    > A client wanting to report a higher investment gain would prefer FIFO, whereas a client wanting to report a lower taxable gain might prefer average cost, where legally permitted. For U.S. tax purposes, average cost generally cannot be used for individual company stocks such as AAPL and MSFT.
     """)
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _():
     year_trades = [
             ("2026-01-05", "AAPL", "buy", 100, 180.00),
@@ -531,7 +565,88 @@ def _():
             ("2026-07-01", "AAPL", "buy", 30, 240.00),
             ("2026-08-12", "AAPL", "sell", 40, 250.00),
         ]
-    year_trades
+    year_trades 
+    return (year_trades,)
+
+
+@app.cell
+def _(year_trades):
+    remaining_purchases = {}
+    gain_by_stock = {}
+    total_gain = 0
+
+    for _date, _ticker, _action, _shares, _price in year_trades:
+        if _ticker not in remaining_purchases:
+            remaining_purchases[_ticker] = []
+            gain_by_stock[_ticker] = 0
+
+        if _action == "buy":
+            remaining_purchases[_ticker].append([_shares, _price])
+
+        else:
+            shares_to_sell = _shares
+            cost_of_sold = 0
+            lots_left = []
+
+            for _lot in remaining_purchases[_ticker]:
+                if shares_to_sell == 0:
+                    lots_left.append(_lot)
+
+                elif _lot[0] <= shares_to_sell:
+                    cost_of_sold += _lot[0] * _lot[1]
+                    shares_to_sell -= _lot[0]
+
+                else:
+                    cost_of_sold += shares_to_sell * _lot[1]
+                    lots_left.append([_lot[0] - shares_to_sell, _lot[1]])
+                    shares_to_sell = 0
+
+            remaining_purchases[_ticker] = lots_left
+
+            gain = _shares * _price - cost_of_sold
+            gain_by_stock[_ticker] += gain
+            total_gain += gain
+
+            print(f"{_date} {_ticker}: ${gain:,.2f}")
+
+    print(f"Total gain: ${total_gain:,.2f}")
+    print(gain_by_stock)
+    print(remaining_purchases)
+    return
+
+
+@app.cell
+def _(year_trades):
+    avg_holdings = {}
+    avg_gains = {}
+    avg_total_gain = 0
+
+    for _date, _ticker, _action, _shares, _price in year_trades:
+        if _ticker not in avg_holdings:
+            avg_holdings[_ticker] = [0, 0]
+            avg_gains[_ticker] = 0
+
+        if _action == "buy":
+            avg_holdings[_ticker][0] += _shares
+            avg_holdings[_ticker][1] += _shares * _price
+
+        else:
+            _average_price = avg_holdings[_ticker][1] / avg_holdings[_ticker][0]
+            _gain = _shares * (_price - _average_price)
+
+            avg_gains[_ticker] += _gain
+            avg_total_gain += _gain
+
+            avg_holdings[_ticker][0] -= _shares
+            avg_holdings[_ticker][1] -= _shares * _average_price
+
+            print(f"{_date} {_ticker}: ${_gain:,.2f}")
+
+    print(f"Average-cost total gain: ${avg_total_gain:,.2f}")
+    print(avg_gains)
+
+    for _ticker, _info in avg_holdings.items():
+        print(f"{_ticker}: {_info[0]} shares, average cost ${_info[1] / _info[0]:,.2f}")
     return
 
 
@@ -571,7 +686,7 @@ def _(requests):
     print(babson_url)
     babson_reply = requests.get(babson_url, timeout=10)
     babson_reply.status_code
-    return (babson_reply,)
+    return babson_reply, babson_url
 
 
 @app.cell
@@ -619,16 +734,6 @@ def _(mo):
     ## When the request is wrong
     A latitude of 422 does not exist. The server answers **400**, which means *your request was wrong*, and its reply says why.
     """)
-    return
-
-
-@app.cell
-def _(requests):
-    bad_latitude_reply = requests.get(
-            "https://api.open-meteo.com/v1/forecast?latitude=422&longitude=-71.2595&current=temperature_2m",
-            timeout=10,
-        )
-    bad_latitude_reply.status_code, bad_latitude_reply.json()
     return
 
 
@@ -707,11 +812,65 @@ def _(mo):
 
 
 @app.cell
+def _(requests):
+    wellesley_reply = requests.get(
+        "https://geocoding-api.open-meteo.com/v1/search?name=Wellesley&count=1",
+        timeout=10,
+    )
+
+    wellesley_place = wellesley_reply.json()["results"][0]
+
+    latitude = wellesley_place["latitude"]
+    longitude = wellesley_place["longitude"]
+    state = wellesley_place["admin1"]
+
+    print(latitude)
+    print(longitude)
+    print(state)
+    return latitude, longitude
+
+
+@app.cell
 def _(mo):
     mo.md(r"""
     **G · The first result.** Search for `Babson Park` and look at the first place in `results`. In the written answers cell, answer under **G**: which state is it in, and what would code that always takes `[0]` have done with it?
+
+    The first result for Babson Park is in Florida, not Massachusetts. If the code always selects [0], it would choose Babson Park in Florida instead of the location near Babson College in Massachusetts. This shows that the first search result is not always the correct location.
+
     **Going further.** Use F's coordinates to ask for Wellesley's current temperature. Build the address with an f-string, so that changing the town changes the forecast.
     """)
+    return
+
+
+@app.cell
+def _(requests):
+    babson_park_reply = requests.get(
+        "https://geocoding-api.open-meteo.com/v1/search?name=Babson%20Park&count=1",
+        timeout=10,
+    )
+
+    first_place = babson_park_reply.json()["results"][0]
+
+    print(first_place["name"])
+    print(first_place["admin1"])
+    print(first_place["country"])
+    return
+
+
+@app.cell
+def _(latitude, longitude, requests):
+    wellesley_url = (
+        "https://api.open-meteo.com/v1/forecast"
+        f"?latitude={latitude}&longitude={longitude}"
+        "&current=temperature_2m"
+        "&temperature_unit=fahrenheit"
+    )
+
+    wellesley_reply_weather = requests.get(wellesley_url, timeout=10)
+
+    wellesley_weather = wellesley_reply_weather.json()
+
+    print(wellesley_weather["current"]["temperature_2m"])
     return
 
 
@@ -724,10 +883,58 @@ def _(mo):
 
 
 @app.cell
+def _(babson_url, requests):
+    week_url = babson_url + "&daily=temperature_2m_max,temperature_2m_min"
+
+    week_reply = requests.get(week_url, timeout=10)
+    week_data = week_reply.json()
+
+    week_days = week_data["daily"]
+
+    week_forecast = []
+    day_number = 0
+
+    for _date in week_days["time"]:
+        _one_day = {
+            "date": _date,
+            "high": week_days["temperature_2m_max"][day_number],
+            "low": week_days["temperature_2m_min"][day_number]
+        }
+
+        week_forecast.append(_one_day)
+        day_number += 1
+
+    week_forecast
+    return
+
+
+@app.cell
 def _(mo):
     mo.md(r"""
     > **Advanced · I · A second API.** Kraken, a cryptocurrency exchange, publishes prices with no key: `https://api.kraken.com/0/public/Ticker?pair=XBTUSD`. Request it, then change the pair to `XBTUSX`. Compare the status code and the reply with Open-Meteo's misspelled search. Both answer 200 to a request that failed, and each shows the failure in its own way.
+    >
+    > Both Kraken and Open-Meteo can return a status code of 200 even when the requested information is not found. Kraken shows an error message saying "Unknown asset pair," while Open-Meteo returns no matching location. This shows that a status code of 200 means the HTTP request was successful, but it does not necessarily mean the requested data was found.
     """)
+    return
+
+
+@app.cell
+def _(requests):
+    kraken_reply = requests.get(
+        "https://api.kraken.com/0/public/Ticker?pair=XBTUSD",
+        timeout=10
+    )
+
+    print(kraken_reply.status_code)
+    print(kraken_reply.json())
+
+    kraken_wrong = requests.get(
+        "https://api.kraken.com/0/public/Ticker?pair=XBTUSX",
+        timeout=10
+    )
+
+    print(kraken_wrong.status_code)
+    print(kraken_wrong.json())
     return
 
 
