@@ -556,31 +556,38 @@ def _(mo):
 
     Attempt at least one task beyond the main assignment.
 
-    **Ideas for Option C:**
 
-    - Compare two or three towns.
-    - Compare the forecast against a second weather API.
-    - Score each day out of 10 instead of using pass/fail.
-    - Allow users to change the weather rules without editing Python code.
+    ### What I Attempted
 
-    **What I attempted:**
+    I decided to go beyond the pass/fail system by creating a weather scoring system that rates each day out of 10.
 
-    [Describe the additional task.]
+    ### How I Attempted It
 
-    **How I attempted it:**
+    I used my existing check_weather() function to count how many weather requirements each day breaks. Every day starts with 10 points, and I subtract 2 points for each broken rule.
 
-    [Explain what you did.]
+    ### What I Found
 
-    **What I found:**
+    My results showed that October 17, 19, and 20 received 10/10 because they met all four weather requirements. The other four days received 8/10 because they each broke one rule.
 
-    [Describe the outcome, including any difficulties.]
+    This scoring system makes it easier to compare the weather conditions across the seven days. However, I still need to consider rain probability and wind speed to choose the best day when multiple days receive the same score.
 
-    **Where can my work be found?**
+    ### Where My Work Is Located
 
-    [Identify the relevant notebook cell.]
-
-    The attempt counts even if it does not succeed.
+    The Python cell directly under Section 9 — Going Further.
     """)
+    return
+
+
+@app.cell
+def _(check_weather, weather_limits, weather_records):
+    print("Weather Scores")
+    print("-----------------------")
+
+    for _day in weather_records:
+        _broken = check_weather(_day, weather_limits)[1]
+        _score = 10 - (_broken * 2)
+
+        print(f"{_day['date']}: {_score}/10")
     return
 
 
