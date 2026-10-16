@@ -1,4 +1,3 @@
-
 import marimo
 
 __generated_with = "0.24.2"
@@ -125,6 +124,19 @@ def _(mo):
     return
 
 
+@app.cell
+def _():
+    place = "Wellesley"
+    state = "Massachusetts"
+
+    lowest_high_f = 55
+    highest_high_f = 80
+
+    max_rain_chance = 30
+    max_wind_mph = 15
+    return place, state
+
+
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
@@ -147,6 +159,81 @@ def _(mo):
 
     I will use basic Python with functions, lists, dictionaries, loops, and conditions.
     """)
+    return
+
+
+@app.cell
+def _(place, state):
+    import requests
+
+    def find_coordinates(place, state):
+        url = "https://geocoding-api.open-meteo.com/v1/search"
+        params = {"name": place, "count": 100, "country_code": "US"}
+
+        reply = requests.get(url, params=params, timeout=10)
+        data = reply.json()
+
+        if "results" not in data:
+            return None
+
+        for _town in data["results"]:
+            if _town["admin1"] == state:
+                return _town["latitude"], _town["longitude"]
+
+        return None
+
+    print(find_coordinates(place, state))
+    return find_coordinates, requests
+
+
+@app.cell
+def _(find_coordinates, place, requests, state):
+    def get_forecast(place, state):
+        coordinates = find_coordinates(place, state)
+
+        if coordinates is None:
+            return []
+
+        latitude = coordinates[0]
+        longitude = coordinates[1]
+
+        url = "https://api.open-meteo.com/v1/forecast"
+
+        params = {
+            "latitude": latitude,
+            "longitude": longitude,
+            "daily": "temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max",
+            "temperature_unit": "fahrenheit",
+            "wind_speed_unit": "mph",
+            "timezone": "America/New_York",
+            "forecast_days": 7
+        }
+
+        reply = requests.get(url, params=params, timeout=10)
+        data = reply.json()
+
+        daily = data["daily"]
+        records = []
+
+        for _i in range(len(daily["time"])):
+            record = {
+                "date": daily["time"][_i],
+                "high_f": daily["temperature_2m_max"][_i],
+                "low_f": daily["temperature_2m_min"][_i],
+                "rain_chance": daily["precipitation_probability_max"][_i],
+                "wind_mph": daily["wind_speed_10m_max"][_i]
+            }
+
+            records.append(record)
+
+        return records
+
+
+    weather_records = get_forecast(place, state)
+
+    print("Number of days:", len(weather_records))
+    print("First day:", weather_records[0])
+    print("Last day:", weather_records[-1])
     return
 
 
