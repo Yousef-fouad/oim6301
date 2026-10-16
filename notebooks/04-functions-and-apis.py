@@ -189,13 +189,88 @@ def _(mo):
     return
 
 
+@app.cell
+def _(holdings, retirement_holdings):
+    def count_shares(portfolio):
+        total_shares = 0
+
+        for stock in portfolio:
+            total_shares = total_shares + stock[1]
+
+        return total_shares
+
+    print(count_shares(holdings))
+    print(count_shares(retirement_holdings))
+    return
+
+
+@app.cell
+def _(holdings, retirement_holdings):
+    def find_largest(portfolio):
+        largest_cost = 0
+        largest_ticker = ""
+
+        for stock in portfolio:
+            stock_cost = stock[1] * stock[2]
+
+            if stock_cost > largest_cost:
+                largest_cost = stock_cost
+                largest_ticker = stock[0]
+
+        return (largest_ticker, largest_cost)
+
+    print(find_largest(holdings))
+    print(find_largest(retirement_holdings))
+    return
+
+
+@app.cell
+def _(holdings, retirement_holdings):
+    def find_large(portfolio, n):
+        costs = []
+
+        for stock in portfolio:
+            stock_cost = round(stock[1] * stock[2], 2)
+            costs.append((stock_cost, stock[0]))
+
+        costs = sorted(costs, reverse=True)
+
+        largest_holdings = []
+
+        for stock in costs[:n]:
+            largest_holdings.append((stock[1], stock[0]))
+
+        return largest_holdings
+
+    print(find_large(holdings, 3))
+    print(find_large(retirement_holdings, 2))
+    return
+
+
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
     ## ✏️ B · Without `return`
 
     Copy `count_shares` into a new cell under a new name, and put `print(...)` where the `return` was. Call it and keep the result in a name. In a markdown cell under it, answer: what does that name hold, and what could the next cell do with it?
+
+    The variable result holds None because the function prints the total number of shares instead of returning it. Another cell could check that result is None, but it cannot use result as the number of shares for calculations.
     """)
+    return
+
+
+@app.cell
+def _(holdings):
+    def count_shares_print(portfolio):
+        total_shares = 0
+
+        for stock in portfolio:
+            total_shares = total_shares + stock[1]
+
+        print(total_shares)
+
+    result = count_shares_print(holdings)
+    print(result)
     return
 
 
@@ -334,6 +409,55 @@ def _(mo):
     return
 
 
+@app.cell
+def _(requests):
+    def get_temperature(town, state):
+        town_url = f"https://geocoding-api.open-meteo.com/v1/search?name={town}&count=100"
+
+        town_reply = requests.get(town_url, timeout=10)
+        town_data = town_reply.json()
+
+        matching_places = []
+
+        for place in town_data["results"]:
+            if place["admin1"] == state:
+                matching_places.append(place)
+
+        if len(matching_places) == 0:
+            return None
+
+        latitude = matching_places[0]["latitude"]
+        longitude = matching_places[0]["longitude"]
+
+        weather_url = (
+            "https://api.open-meteo.com/v1/forecast"
+            f"?latitude={latitude}&longitude={longitude}"
+            "&current=temperature_2m"
+            "&temperature_unit=fahrenheit"
+        )
+
+        weather_reply = requests.get(weather_url, timeout=10)
+        weather_data = weather_reply.json()
+
+        return weather_data["current"]["temperature_2m"]
+
+    print(get_temperature("Babson Park", "Florida"))
+    print(get_temperature("Wellesley", "Massachusetts"))
+    print(get_temperature("Babson Park", "Massachusetts"))
+    return (get_temperature,)
+
+
+@app.cell
+def _(get_temperature):
+    print(get_temperature("Babson Park", "Massachusetts"))
+    return
+
+
+@app.cell
+def _():
+    return
+
+
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
@@ -343,6 +467,21 @@ def _(mo):
 
     *Check yourself: Dover, Wellesley, Cohasset, Needham, Westwood.*
     """)
+    return
+
+
+@app.cell
+def _(requests):
+    top_norfolk_reply = requests.get(
+        "https://oim.zhili.dev/ma/towns",
+        params={"county": "Norfolk", "sort": "income", "order": "desc", "per_page": 5},
+        timeout=10
+    )
+
+    top_norfolk_data = top_norfolk_reply.json()
+
+    for _town in top_norfolk_data["items"]:
+        print(_town["name"])
     return
 
 
@@ -362,6 +501,80 @@ def _(mo):
     return
 
 
+@app.cell
+def _(requests):
+    wellesley_town_reply = requests.get(
+        "https://oim.zhili.dev/ma/towns",
+        params={"name": "Wellesley"},
+        timeout=10
+    )
+
+    wellesley_town = wellesley_town_reply.json()["items"][0]
+
+    dor_code = wellesley_town["dor_code"]
+
+    print(dor_code)
+    return (dor_code,)
+
+
+@app.cell
+def _(dor_code, requests):
+    history_reply = requests.get(
+        f"https://oim.zhili.dev/ma/towns/{dor_code}/history",
+        params={"year": 2026},
+        timeout=10
+    )
+
+    history_data = history_reply.json()
+
+    print(history_reply.status_code)
+    print(history_data)
+    return (history_data,)
+
+
+@app.cell
+def _(history_data):
+    for _year in history_data["years"]:
+        if _year["fiscal_year"] == 2026:
+            average_value = _year["average_single_family_value_dollars"]
+            tax_rate = _year["residential_rate_per_thousand"]
+            actual_bill = _year["average_single_family_bill_dollars"]
+
+    calculated_bill = average_value * tax_rate / 1000
+
+    print(round(calculated_bill, 2))
+    print(actual_bill)
+
+    return
+
+
+@app.cell
+def _(requests):
+    def town_history(name):
+        town_reply = requests.get(
+            "https://oim.zhili.dev/ma/towns",
+            params={"name": name},
+            timeout=10
+        )
+
+        town_data = town_reply.json()
+        dor_code = town_data["items"][0]["dor_code"]
+
+        history_reply = requests.get(
+            f"https://oim.zhili.dev/ma/towns/{dor_code}/history",
+            timeout=10
+        )
+
+        return history_reply.json()
+
+
+    wellesley_history = town_history("Wellesley")
+
+    print(wellesley_history["name"])
+    print(wellesley_history["years"][-1])
+    return
+
+
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
@@ -376,7 +589,7 @@ def _(mo):
 def _(requests):
     state_first_page = requests.get("https://oim.zhili.dev/ma/towns", timeout=10).json()
     len(state_first_page["items"]), state_first_page["pagination"]
-    return
+    return (state_first_page,)
 
 
 @app.cell(hide_code=True)
@@ -440,6 +653,54 @@ def _(mo):
 
     **Going further.** Which town has the highest average single-family tax bill in the state, and which the lowest?
     """)
+    return
+
+
+@app.cell
+def _(get_page, state_first_page):
+    def get_all_towns():
+        first_page = get_page(1)
+
+        all_towns = first_page["items"]
+        pages = first_page["pagination"]["pages"]
+
+        for page in range(2, pages + 1):
+            next_page = get_page(page)
+            all_towns.extend(next_page["items"])
+
+        return all_towns
+
+
+    towns = get_all_towns()
+
+    print(len(towns))
+    print(towns[0]["name"])
+    print(towns[-1]["name"])
+    print(len(towns) == state_first_page["pagination"]["total"])
+    return (towns,)
+
+
+@app.cell
+def _(towns):
+    highest_town = ""
+    lowest_town = ""
+
+    highest_bill = towns[0]["average_single_family_bill_dollars"]
+    lowest_bill = towns[0]["average_single_family_bill_dollars"]
+
+    for _town in towns:
+        _bill = _town["average_single_family_bill_dollars"]
+
+        if _bill > highest_bill:
+            highest_bill = _bill
+            highest_town = _town["name"]
+
+        if _bill < lowest_bill:
+            lowest_bill = _bill
+            lowest_town = _town["name"]
+
+    print(f"Highest: {highest_town}, ${highest_bill:,.2f}")
+    print(f"Lowest: {lowest_town}, ${lowest_bill:,.2f}")
     return
 
 
