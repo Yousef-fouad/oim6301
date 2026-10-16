@@ -500,63 +500,53 @@ def _(mo):
     mo.md(r"""
     ## 8. Reading It Back
 
-    ### Function 1
+    ### Function 1 — get_forecast(place, state)
 
-    **Function name:** [Name]
+    **Inputs:**
 
-    **What goes into the function?**
+    The town name and state.
 
-    [Explain the inputs.]
+    **Output:**
 
-    **What comes out of the function?**
-
-    [Explain the output.]
+    A list containing seven daily weather records, including each day's date, high temperature, low temperature, chance of rain, and maximum wind speed.
 
     **One line I needed to understand:**
 
-    [Identify and explain the line in your own words.]
+    `for _i in range(len(daily["time"])):`
 
-    ### Function 2
+    This line goes through the dates returned by the API. The variable `_i` identifies the position of each day, allowing the function to collect the corresponding weather measurements from the different lists.
 
-    **Function name:** [Name]
+    ### Function 2 — find_best_day(records, limits)
 
-    **What goes into the function?**
+    **Inputs:**
 
-    [Explain the inputs.]
+    A list of weather records and a dictionary containing the weather limits.
 
-    **What comes out of the function?**
+    **Output:**
 
-    [Explain the output.]
+    The record for the best day to hold the outdoor event.
 
     **One line I needed to understand:**
 
-    [Identify and explain the line in your own words.]
+    `best_broken = check_weather(best_day, limits)[1]`
+
+    The `check_weather()` function returns two values: whether the day passes and the number of rules it breaks. The `[1]` selects the second value, which tells us how many rules that day breaks.
 
     ### My Prediction
 
-    Choose one change to the tool, such as changing the town or a weather limit.
-
     **Input I plan to change:**
 
-    [Write your answer.]
+    I will change `max_rain_chance` from `30` to `5`.
 
     **What I predict will happen:**
 
-    [Write your prediction before making the change.]
-
-    **STOP: Commit and push with the exact message:**
-
-    `mp2: prediction`
-
-    Only after committing and pushing should I change the input and run the notebook again.
+    I expected way fewer days to meet my limit requirements because I am lowering the maximum chance of rain allowed. Based on the current forecast, none of the seven days should pass all the rules. Therefore, the program should recommend an alternative day that breaks the fewest rules.
 
     ### What Actually Happened
 
-    [Describe the results after changing the input.]
+
 
     **Did the results match my prediction?**
-
-    [Explain why or why not.]
     """)
     return
 
