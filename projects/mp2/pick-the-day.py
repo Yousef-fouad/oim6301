@@ -132,7 +132,7 @@ def _():
     lowest_high_f = 55
     highest_high_f = 80
 
-    max_rain_chance = 30
+    max_rain_chance = 5
     max_wind_mph = 15
     return (
         highest_high_f,
@@ -545,6 +545,16 @@ def _(mo):
     I also expect the recommended date to change from October 19 to October 16, 2026. This is because October 16 breaks only one rule and is the earliest date among the days tied for the fewest broken rules.
 
     I expect the table to show no passing days, and the final recommendation sentence to explain why the alternative day was selected.
+
+    **What actaully Happened**
+
+    After changing the maximum rain chance from 30% to 5%, I ran my program again. My results showed that none of the seven days passed all four weather requirements.
+
+    The recommended day changed from October 19 to October 16, 2026. October 16 had a high temperature of 67.0°F, a 79% chance of rain, and wind speeds of 12.0 mph. It broke one weather rule and was the earliest date among the days tied for the fewest broken rules.
+
+    Did the Results Match My Prediction?
+
+    Yes, my prediction was correct. Lowering the rain limit made the requirements stricter, resulting in no qualifying days. The program selected October 16 as the best alternative, following the rules I programmed.
     """)
     return
 
