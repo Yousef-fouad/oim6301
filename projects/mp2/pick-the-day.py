@@ -536,17 +536,15 @@ def _(mo):
 
     **Input I plan to change:**
 
-    I will change `max_rain_chance` from `30` to `5`.
+    I will change the maximum rain chance from 30% to 5% in my Inputs section.
 
     **What I predict will happen:**
 
-    I expected way fewer days to meet my limit requirements because I am lowering the maximum chance of rain allowed. Based on the current forecast, none of the seven days should pass all the rules. Therefore, the program should recommend an alternative day that breaks the fewest rules.
+    I expect fewer days to qualify because I am making the rain requirement stricter. Based on my current weather data, I predict that none of the seven days will meet all four requirements.
 
-    ### What Actually Happened
+    I also expect the recommended date to change from October 19 to October 16, 2026. This is because October 16 breaks only one rule and is the earliest date among the days tied for the fewest broken rules.
 
-
-
-    **Did the results match my prediction?**
+    I expect the table to show no passing days, and the final recommendation sentence to explain why the alternative day was selected.
     """)
     return
 
