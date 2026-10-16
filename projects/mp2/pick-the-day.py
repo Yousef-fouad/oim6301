@@ -1,3 +1,4 @@
+
 import marimo
 
 __generated_with = "0.24.2"
@@ -103,9 +104,6 @@ def _(mo):
     return
 
 
-if __name__ == "__main__":
-    app.run()
-
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
@@ -171,7 +169,7 @@ def _(mo):
     **Choosing the best day:**
 
     - If several days pass, choose the lowest chance of rain.
-    - If rain probability is tied, choose the lower wind speed.
+    - If rain probability is tied, choose the lower wind.
     - If no days pass, choose the day that breaks the fewest rules.
     - If those days are tied, choose the earlier day.
     - A value equal to a weather limit passes.
@@ -352,3 +350,7 @@ def _(mo):
     This section is not graded.
     """)
     return
+
+
+if __name__ == "__main__":
+    app.run()
