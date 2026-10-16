@@ -406,6 +406,34 @@ def _(check_weather, place, recommended_day, state, weather_limits):
     return
 
 
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## 6. How I Know These Numbers Are Right
+
+    Independently verify at least one result in this notebook.
+
+    A Python verification cell must show both results and demonstrate that they agree.
+
+    **My verification:**
+
+    I independently checked whether my recommended day, which is October 19, 2026, satisfied all four limits that were set up. I used a separate if statement to count the broken rules without calling my original function.
+
+    **Result from the main program:**
+
+    0 broken rules.
+
+    **Result from the independent check:**
+
+    0 broken rules.
+
+    **Do they agree?**
+
+    Yes, both methods returned with 0 broken rules. This confirmed my assumption on top and made sure they adhered to my limits.
+    """)
+    return
+
+
 @app.cell
 def _(
     check_weather,
@@ -444,55 +472,25 @@ def _(
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    ## 6. How I Know These Numbers Are Right
-
-    Independently verify at least one result in this notebook.
-
-    A Python verification cell must show both results and demonstrate that they agree.
-
-    **My verification:**
-
-    I independently checked whether my recommended day, which is October 19, 2026, satisfied all four limits that were set up. I used a separate if statement to count the broken rules without calling my original function.
-
-    **Result from the main program:**
-
-    0 broken rules.
-
-    **Result from the independent check:**
-
-    0 broken rules.
-
-    **Do they agree?**
-
-    Yes, both methods returned with 0 broken rules. This confirmed my assumption on top and made sure they adhered to my limits.
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
     ## 7. Working With the Agent
 
     Choose one piece of AI-generated code that you reviewed.
 
     **What did the agent suggest?**
 
-    [Write your answer.]
+    The AI helped create the check_weather() function, which checks if a day meets my limit requirements and counts how many limits the day break.
 
     **What did I change, or how did I verify it?**
 
-    [Write your answer.]
+    I tested my fiction using the weather data provided by Open-Meteo. For Oct 16, the function returned false and 1 broken limit. The results matched the measurement.
 
     **How do I know the code works correctly?**
 
-    [Write your answer.]
+    In section 6, I independently checked the recommendation code. I used separate if-statements, my original functions returned 0 limits broken, and my independent check returned the name. Python confirmed that both results agreed by displaying True.
 
     **Which cell or GitHub commit demonstrates this?**
 
-    [Identify the cell or commit.]
-
-    If the AI-generated code was correct the first time, explain how you tested and verified it.
+    The check_weather() function in Section 4 and the independent verification cell in Section 6 demonstrate how I tested the AI-generated code.
     """)
     return
 
