@@ -214,9 +214,11 @@ def _(closing_prices):
 @app.cell
 def _(closing_prices):
     above_200 = []
-    for ticker, close in closing_prices.items():
-        if close > 200:
-            above_200.append(ticker)
+
+    for _ticker, _close in closing_prices.items():
+        if _close > 200:
+            above_200.append(_ticker)
+
     print(above_200)
     return
 

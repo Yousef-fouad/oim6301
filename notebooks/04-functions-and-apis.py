@@ -253,9 +253,13 @@ def _(mo):
     ## ✏️ B · Without `return`
 
     Copy `count_shares` into a new cell under a new name, and put `print(...)` where the `return` was. Call it and keep the result in a name. In a markdown cell under it, answer: what does that name hold, and what could the next cell do with it?
-
-    The variable result holds None because the function prints the total number of shares instead of returning it. Another cell could check that result is None, but it cannot use result as the number of shares for calculations.
     """)
+    return
+
+
+@app.cell
+def _():
+    # *** The variable result holds None because the function prints the total number of shares instead of returning it. Another cell could check that result is None, but it cannot use result as the number of shares for calculations.***
     return
 
 
@@ -411,7 +415,7 @@ def _(mo):
 
 @app.cell
 def _(requests):
-    def get_temperature(town, state):
+    def get_temperature(town, state=None):
         town_url = f"https://geocoding-api.open-meteo.com/v1/search?name={town}&count=100"
 
         town_reply = requests.get(town_url, timeout=10)
@@ -420,7 +424,7 @@ def _(requests):
         matching_places = []
 
         for place in town_data["results"]:
-            if place["admin1"] == state:
+            if state is None or place["admin1"] == state:
                 matching_places.append(place)
 
         if len(matching_places) == 0:
@@ -442,6 +446,7 @@ def _(requests):
         return weather_data["current"]["temperature_2m"]
 
     print(get_temperature("Babson Park", "Florida"))
+    print(get_temperature("Wellesley"))
     print(get_temperature("Wellesley", "Massachusetts"))
     print(get_temperature("Babson Park", "Massachusetts"))
     return (get_temperature,)
@@ -544,7 +549,6 @@ def _(history_data):
 
     print(round(calculated_bill, 2))
     print(actual_bill)
-
     return
 
 
