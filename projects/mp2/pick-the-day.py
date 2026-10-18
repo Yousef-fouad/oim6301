@@ -421,15 +421,15 @@ def _(mo):
 
     **Result from the main program:**
 
-    0 broken rules.
+    1 broken rules.
 
     **Result from the independent check:**
 
-    0 broken rules.
+    1 broken rules.
 
     **Do they agree?**
 
-    Yes, both methods returned with 0 broken rules. This confirmed my assumption on top and made sure they adhered to my limits.
+    Yes, both methods returned with 1 broken rules. This confirmed my assumption on top and made sure they adhered to my limits. One Rule was broken becuase program correctly identifies the number of weather rules broken by the recommended day.
     """)
     return
 
@@ -514,7 +514,7 @@ def _(mo):
 
     `for _i in range(len(daily["time"])):`
 
-    This line goes through the dates returned by the API. The variable `_i` identifies the position of each day, allowing the function to collect the corresponding weather measurements from the different lists.
+    This line goes through the dates returned by the API. The variable _i identifies the position of each day, allowing the function to collect the corresponding weather measurements from the different lists.
 
     ### Function 2 — find_best_day(records, limits)
 
@@ -530,7 +530,7 @@ def _(mo):
 
     `best_broken = check_weather(best_day, limits)[1]`
 
-    The `check_weather()` function returns two values: whether the day passes and the number of rules it breaks. The `[1]` selects the second value, which tells us how many rules that day breaks.
+    The `check_weather()` function returns two values: whether the day passes and the number of rules it breaks. The 1 selects the second value, which tells us how many rules that day breaks.
 
     ### My Prediction
 
@@ -584,6 +584,12 @@ def _(mo):
     ### Where My Work Is Located
 
     The Python cell directly under Section 9 — Going Further.
+
+    **What I found**
+
+    After changing the maximum rain chance from 30% to 5%, my scoring system showed different results. October 16, 18, 19, and 20 received 8/10 because they each broke one weather requirement. October 17, 21, and 22 received 6/10 because they each broke two requirements.
+
+    No day received 10/10 because none met all four weather requirements. The scoring system helped me identify which days broke fewer rules, while my main function selected October 16 as the best alternative because it was the earliest day among those tied for the fewest broken rules.
     """)
     return
 
@@ -608,7 +614,7 @@ def _(mo):
 
     Approximate number of hours spent working on this project outside class:
 
-    [Enter one number.]
+    [ 6 hours]
 
     This section is not graded.
     """)
