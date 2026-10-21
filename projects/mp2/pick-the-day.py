@@ -417,9 +417,9 @@ def _(mo):
 
     **My verification:**
 
-    **forecast recommends October 25, 2026, in Wellesley, Massachusetts.**
+    **On October 21, 2026, my program recommended October 25 for an outdoor event in Wellesley, Massachusetts.**
 
-    I independently checked whether my recommended day, which is October 21, 2026, satisfied all four limits that were set up. I used a separate if statement to count the broken rules without calling my original function.
+    I independently checked the recommended day using separate if statements to count how many weather requirements it broke, without calling my original function.
 
     **Result from the main program:**
 
@@ -431,7 +431,7 @@ def _(mo):
 
     **Do they agree?**
 
-    Yes, both methods returned with 1 broken rules. This confirmed my assumption on top and made sure they adhered to my limits. One Rule was broken becuase program correctly identifies the number of weather rules broken by the recommended day.
+    Yes, both methods returned 0 broken rules, and Python displayed True. This confirms that my recommended day, October 25, met all four weather requirements and that my function correctly identifies the number of broken rules.
     """)
     return
 
