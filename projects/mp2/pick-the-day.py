@@ -116,7 +116,7 @@ def _(mo):
     - State: Massachusetts
     - Lowest allowed high temperature: 55°F
     - Highest allowed high temperature: 80°F
-    - Maximum rain probability: 30%
+    - Maximum rain probability: 5%
     - Maximum wind speed: 15 mph
 
     The inputs will be defined in a Python cell below this section.
@@ -417,15 +417,17 @@ def _(mo):
 
     **My verification:**
 
-    I independently checked whether my recommended day, which is October 19, 2026, satisfied all four limits that were set up. I used a separate if statement to count the broken rules without calling my original function.
+    **forecast recommends October 25, 2026, in Wellesley, Massachusetts.**
+
+    I independently checked whether my recommended day, which is October 21, 2026, satisfied all four limits that were set up. I used a separate if statement to count the broken rules without calling my original function.
 
     **Result from the main program:**
 
-    1 broken rules.
+    0 broken rules.
 
     **Result from the independent check:**
 
-    1 broken rules.
+    0 broken rules.
 
     **Do they agree?**
 
@@ -482,11 +484,11 @@ def _(mo):
 
     **What did I change, or how did I verify it?**
 
-    I tested my fiction using the weather data provided by Open-Meteo. For Oct 16, the function returned false and 1 broken limit. The results matched the measurement.
+    I tested my fuction using the weather data provided by Open-Meteo. For Oct 25, the function returned True and 0 broken limit. The results matched the measurement.
 
     **How do I know the code works correctly?**
 
-    In section 6, I independently checked the recommendation code. I used separate if-statements, my original functions returned 0 limits broken, and my independent check returned the name. Python confirmed that both results agreed by displaying True.
+    In Section 6, I independently verified my `check_weather()` function using separate `if` statements. In my latest test, both calculations returned 0 broken rules, and Python displayed `True`. In my earlier October 16 test, the function correctly identified 1 broken rule. These results show that my function works correctly even when the live weather forecast changes.
 
     **Which cell or GitHub commit demonstrates this?**
 
@@ -577,19 +579,17 @@ def _(mo):
 
     ### What I Found
 
-    My results showed that October 17, 19, and 20 received 10/10 because they met all four weather requirements. The other four days received 8/10 because they each broke one rule.
+    After running my weather scoring system on October 21, 2026, I found that all seven days met the four weather requirements. Each day received 10/10 because none of them broke any rules.
+
+    Although all seven days received the same score, October 25 was the best day for the outdoor event. It had a high temperature of 65.3°F, a 0% chance of rain, and wind speeds of 8.2 mph.
+
+    October 21 also had a 0% chance of rain, but October 25 had lower wind speeds. This showed me that my scoring system can identify suitable days, but I still need to compare rain probability and wind speed to select the best day.
 
     This scoring system makes it easier to compare the weather conditions across the seven days. However, I still need to consider rain probability and wind speed to choose the best day when multiple days receive the same score.
 
     ### Where My Work Is Located
 
     The Python cell directly under Section 9 — Going Further.
-
-    **What I found**
-
-    After changing the maximum rain chance from 30% to 5%, my scoring system showed different results. October 16, 18, 19, and 20 received 8/10 because they each broke one weather requirement. October 17, 21, and 22 received 6/10 because they each broke two requirements.
-
-    No day received 10/10 because none met all four weather requirements. The scoring system helped me identify which days broke fewer rules, while my main function selected October 16 as the best alternative because it was the earliest day among those tied for the fewest broken rules.
     """)
     return
 
@@ -614,7 +614,7 @@ def _(mo):
 
     Approximate number of hours spent working on this project outside class:
 
-    [ 6 hours]
+    [ 8 hours]
 
     This section is not graded.
     """)
