@@ -30,6 +30,7 @@ def _():
     import altair as alt
     import polars as pl
     import requests
+    import plotly
 
     return alt, csv, pl, requests
 
@@ -199,6 +200,79 @@ def _(mo):
     return
 
 
+@app.cell
+def _(towns_from_file):
+    million_count = 0
+    county_count = {}
+
+    for _town in towns_from_file:
+        _value = int(_town["average_single_family_value_dollars"])
+
+        if _value >= 1000000:
+            million_count += 1
+            _county = _town["county"]
+
+            if _county not in county_count:
+                county_count[_county] = 0
+
+            county_count[_county] += 1
+
+    most_county = ""
+    most_count = 0
+
+    for _county in county_count:
+        if county_count[_county] > most_count:
+            most_count = county_count[_county]
+            most_county = _county
+
+    print("Million-dollar towns:", million_count)
+    print("County with the most:", most_county, most_count)
+    # start with a counter set to zero and an empty dictionary. Loop through towns_from_file, convert each home's assessed value using int(), and check whether it is at least $1,000,000. Count qualifying towns and keep a separate count for each county.
+    return
+
+
+@app.cell
+def _(towns_from_file):
+    smallest_town = towns_from_file[0]
+    largest_town = towns_from_file[0]
+
+    for _town in towns_from_file:
+        _population = int(_town["population"])
+
+        if _population < int(smallest_town["population"]):
+            smallest_town = _town
+
+        if _population > int(largest_town["population"]):
+            largest_town = _town
+
+    print("Smallest:", smallest_town["name"], smallest_town["population"])
+    print("Largest:", largest_town["name"], largest_town["population"])
+    # Start by assigning the first town to both your smallest and largest variables. Loop through the towns, comparing each population with the smallest and largest values you've found so far.
+    return
+
+
+@app.cell
+def _(towns_from_file):
+    expensive_towns = {}
+
+    for _town in towns_from_file:
+        _county = _town["county"]
+        _value = int(_town["average_single_family_value_dollars"])
+
+        if _county not in expensive_towns:
+            expensive_towns[_county] = _town
+
+        elif _value > int(expensive_towns[_county]["average_single_family_value_dollars"]):
+            expensive_towns[_county] = _town
+
+    for _county in sorted(expensive_towns):
+        _town = expensive_towns[_county]
+
+        print(f"{_county}: {_town['name']} - ${int(_town['average_single_family_value_dollars']):,}")
+        # Create a dictionary where each county is a key. Loop through the towns and store the town with the highest average_single_family_value_dollars for that county. Print the results for all 14 counties.
+    return
+
+
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
@@ -333,6 +407,19 @@ def _(pl, town_table):
 
 
 @app.cell
+def _(pl, town_table):
+    top_five_towns = (
+        town_table
+        .filter(pl.col("population") > 50000)
+        .sort("average_single_family_bill_dollars", descending=True)
+        .head(5)
+    )
+
+    print(top_five_towns)
+    return
+
+
+@app.cell
 def _(county_counts, ma_counties, pl):
     server_counts = pl.DataFrame(ma_counties)
 
@@ -352,6 +439,37 @@ def _(county_counts, ma_counties, pl):
 
     print("Counties checked:", len(ma_counties))
     print("Do all counts agree?", all_agree)
+    return
+
+
+@app.cell
+def _(pl, town_table):
+    top_five_towns = (
+        town_table
+        .filter(pl.col("population") > 50000)
+        .sort("average_single_family_bill_dollars", descending=True)
+        .head(5)
+    )
+
+    print(top_five_towns)
+    return
+
+
+@app.cell
+def _(pl, town_table):
+    county_home_values = (
+        town_table
+        .filter(pl.col("population") > 10000)
+        .group_by("county")
+        .agg(
+            pl.col("average_single_family_value_dollars")
+            .mean()
+            .alias("average_home_value")
+        )
+        .sort("average_home_value", descending=True)
+    )
+
+    print(county_home_values)
     return
 
 
@@ -398,6 +516,74 @@ def _(mo):
 
     **Going further.** Write a SQL query of your own on `town_table`, and check its answer in polars.
     """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo, town_table):
+    _df = mo.sql(
+        f"""
+        SELECT county, COUNT(*) AS town_count
+        FROM town_table
+        WHERE average_single_family_value_dollars >= 2000000
+        GROUP BY county
+        ORDER BY county
+        """
+    )
+    return
+
+
+@app.cell
+def _():
+    # My Prediction
+
+    # If I increase the minimum average home value from $1,000,000 to $2,000,000, I expect the number of qualifying towns to decrease.
+
+    # Counties that have towns valued between $1 million and $2 million will lose some qualifying towns. Counties with no towns in that range will stay the same.
+
+    # No county's count can increase because I am making the requirement stricter.
+    return
+
+
+@app.cell
+def _(pl, town_table):
+    million_towns_2m = (
+        town_table
+        .filter(pl.col("average_single_family_value_dollars") >= 2000000)
+        .group_by("county")
+        .agg(pl.col("name").count().alias("town_count"))
+        .sort("county")
+    )
+
+    print(million_towns_2m)
+    return
+
+
+@app.cell
+def _(pl, town_table):
+    large_towns_by_county = (
+        town_table
+        .filter(pl.col("population") > 50000)
+        .group_by("county")
+        .agg(pl.col("name").count().alias("large_towns"))
+        .sort("large_towns", descending=True)
+    )
+
+    print(large_towns_by_county)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo, town_table):
+    _df = mo.sql(
+        f"""
+        SELECT county, COUNT(*) AS large_towns
+        FROM town_table
+        WHERE population > 50000
+        GROUP BY county
+        ORDER BY large_towns DESC
+        """
+    )
     return
 
 
@@ -451,6 +637,50 @@ def _(mo):
 
     **Going further.** Color the bars or dots by a column with `color=`, and explain what the colors add.
     """)
+    return
+
+
+@app.cell
+def _(town_table):
+    import plotly.express as px
+
+    chart = px.scatter(
+        town_table,
+        x="population",
+        y="average_single_family_value_dollars",
+        title="Population vs. Average Single-Family Home Value in Massachusetts",
+        labels={
+            "population": "Town Population (People)",
+            "average_single_family_value_dollars": "Average Single-Family Home Value ($)"
+        }
+    )
+
+    chart
+    return (px,)
+
+
+@app.cell
+def _(px, town_table):
+    chart_by_county = px.scatter(
+        town_table,
+        x="population",
+        y="average_single_family_value_dollars",
+        color="county",
+        title="Population vs. Average Home Value by Massachusetts County",
+        labels={
+            "population": "Town Population (People)",
+            "average_single_family_value_dollars": "Average Single-Family Home Value ($)",
+            "county": "County"
+        }
+    )
+
+    chart_by_county
+    return
+
+
+@app.cell
+def _():
+    # I added colors to represent the different counties in Massachusetts. This makes it easier to identify which towns belong to the same county and see whether home values and population patterns differ across counties. Without colors, I could compare population and home values, but I would not know which counties the towns belonged to.
     return
 
 
