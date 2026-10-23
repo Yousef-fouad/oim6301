@@ -1,0 +1,11 @@
+Date           High (F)    Low (F)   Rain (%)  Wind (mph)     Pass?
+-------------------------------------------------------------------
+2026-10-22         65.7       44.2          0        13.7       Yes
+2026-10-23         54.6       37.7          0        12.4        No
+2026-10-24         58.4       34.0          0         5.2       Yes
+2026-10-25         65.5       43.8          0         5.1       Yes
+2026-10-26         69.8       45.6          0         7.2       Yes
+2026-10-27         56.4       44.0          0         9.1       Yes
+2026-10-28         54.7       39.5          1         5.5        No
+
+The best day for an outdoor event in Wellesley, Massachusetts is 2026-10-25, with a high temperature of 65.5°F, a 0% chance of rain, and wind speeds of 5.1 mph. It meets all weather requirements and has the best combination of rain probability and wind speed among qualifying days.

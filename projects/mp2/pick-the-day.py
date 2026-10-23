@@ -241,6 +241,10 @@ def _(find_coordinates, place, requests, state):
     print("Number of days:", len(weather_records))
     print("First day:", weather_records[0])
     print("Last day:", weather_records[-1])
+
+    # Number of days: 7
+    # First day: {'date': '2026-10-22', 'high_f': 65.7, 'low_f': 44.2, 'rain_chance': 0, 'wind_mph': 13.7}
+    # Last day: {'date': '2026-10-28', 'high_f': 54.7, 'low_f': 39.5, 'rain_chance': 1, 'wind_mph': 5.5}
     return (weather_records,)
 
 
@@ -280,6 +284,9 @@ def _(
     }
 
     print(check_weather(weather_records[0], weather_limits))
+
+    # (True, 0)
+
     return check_weather, weather_limits
 
 
@@ -322,6 +329,9 @@ def _(check_weather, weather_limits, weather_records):
     recommended_day = find_best_day(weather_records, weather_limits)
 
     print(recommended_day)
+
+    # {'date': '2026-10-25', 'high_f': 65.5, 'low_f': 43.8, 'rain_chance': 0, 'wind_mph': 5.1}
+
     return (recommended_day,)
 
 
@@ -330,6 +340,14 @@ def _(check_weather, weather_limits, weather_records):
     for _day in weather_records:
         _passes, _broken = check_weather(_day, weather_limits)
         print(_day["date"], _passes, _day["rain_chance"], _day["wind_mph"])
+
+    #     2026-10-22 True 0 13.7
+    # 2026-10-23 False 0 12.4
+    # 2026-10-24 True 0 5.2
+    # 2026-10-25 True 0 5.1
+    # 2026-10-26 True 0 7.2
+    # 2026-10-27 True 0 9.1
+    # # 2026-10-28 False 1 5.5
     return
 
 
@@ -344,7 +362,7 @@ def _(weather_records):
         json.dump(weather_records, _file, indent=4)
 
     print("Saved", len(weather_records), "weather records.")
-    return
+    return json, os
 
 
 @app.cell(hide_code=True)
@@ -392,6 +410,17 @@ def _(check_weather, weather_limits, weather_records):
             _status = "No"
 
         print(f"{_day['date']:<12}{_day['high_f']:>11.1f}{_day['low_f']:>11.1f}{_day['rain_chance']:>11}{_day['wind_mph']:>12.1f}{_status:>10}")
+
+    # Date           High (F)    Low (F)   Rain (%)  Wind (mph)     Pass?
+    # -------------------------------------------------------------------
+    # 2026-10-22         65.7       44.2          0        13.7       Yes
+    # 2026-10-23         54.6       37.7          0        12.4        No
+    # 2026-10-24         58.4       34.0          0         5.2       Yes
+    # 2026-10-25         65.5       43.8          0         5.1       Yes
+    # 2026-10-26         69.8       45.6          0         7.2       Yes
+    # 2026-10-27         56.4       44.0          0         9.1       Yes
+    # 2026-10-28         54.7       39.5          1         5.5        No
+
     return
 
 
@@ -403,6 +432,9 @@ def _(check_weather, place, recommended_day, state, weather_limits):
         print(f"The best day for an outdoor event in {place}, {state} is {recommended_day['date']}, with a high temperature of {recommended_day['high_f']}°F, a {recommended_day['rain_chance']}% chance of rain, and wind speeds of {recommended_day['wind_mph']} mph. It meets all weather requirements and has the best combination of rain probability and wind speed among qualifying days.")
     else:
         print(f"No day meets all weather requirements in {place}, {state}. The best alternative is {recommended_day['date']}, with a high temperature of {recommended_day['high_f']}°F, a {recommended_day['rain_chance']}% chance of rain, and wind speeds of {recommended_day['wind_mph']} mph. It breaks {_best_broken} weather rule(s), the fewest among the seven days.")
+
+        # The best day for an outdoor event in Wellesley, Massachusetts is 2026-10-25, with a high temperature of 65.5°F, a 0% chance of rain, and wind speeds of 5.1 mph. It meets all weather requirements and has the best combination of rain probability and wind speed among qualifying days.
+
     return
 
 
@@ -417,7 +449,7 @@ def _(mo):
 
     **My verification:**
 
-    **On October 21, 2026, my program recommended October 25 for an outdoor event in Wellesley, Massachusetts.**
+    **On October 22, 2026, my program recommended October 25 for an outdoor event in Wellesley, Massachusetts.**
 
     I independently checked the recommended day using separate if statements to count how many weather requirements it broke, without calling my original function.
 
@@ -468,7 +500,11 @@ def _(
     print("Main function - broken rules:", main_broken)
     print("Independent check - broken rules:", independent_broken)
     print("Do they agree?", main_broken == independent_broken)
-    return
+
+    # Main function - broken rules: 0
+    # Independent check - broken rules: 0
+    # Do they agree? True
+    return independent_broken, main_broken
 
 
 @app.cell(hide_code=True)
@@ -579,11 +615,6 @@ def _(mo):
 
     ### What I Found
 
-    After running my weather scoring system on October 21, 2026, I found that all seven days met the four weather requirements. Each day received 10/10 because none of them broke any rules.
-
-    Although all seven days received the same score, October 25 was the best day for the outdoor event. It had a high temperature of 65.3°F, a 0% chance of rain, and wind speeds of 8.2 mph.
-
-    October 21 also had a 0% chance of rain, but October 25 had lower wind speeds. This showed me that my scoring system can identify suitable days, but I still need to compare rain probability and wind speed to select the best day.
 
     This scoring system makes it easier to compare the weather conditions across the seven days. However, I still need to consider rain probability and wind speed to choose the best day when multiple days receive the same score.
 
@@ -604,6 +635,56 @@ def _(check_weather, weather_limits, weather_records):
         _score = 10 - (_broken * 2)
 
         print(f"{_day['date']}: {_score}/10")
+    return
+
+
+@app.cell
+def _(
+    check_weather,
+    independent_broken,
+    json,
+    main_broken,
+    os,
+    place,
+    recommended_day,
+    state,
+    weather_limits,
+    weather_records,
+):
+    os.makedirs("projects/mp2/evidence", exist_ok=True)
+
+    with open("projects/mp2/evidence/weather_records_2026-10-22.json", "w") as _file:
+        json.dump(weather_records, _file, indent=4)
+
+    verification_results = {
+        "recommended_day": recommended_day,
+        "main_function_broken_rules": main_broken,
+        "independent_check_broken_rules": independent_broken,
+        "agree": main_broken == independent_broken
+    }
+
+    with open("projects/mp2/evidence/section6_verification.json", "w") as _file:
+        json.dump(verification_results, _file, indent=4)
+
+    going_further_scores = {}
+    for _day in weather_records:
+        _broken = check_weather(_day, weather_limits)[1]
+        going_further_scores[_day["date"]] = 10 - (_broken * 2)
+
+    with open("projects/mp2/evidence/section9_scores.json", "w") as _file:
+        json.dump(going_further_scores, _file, indent=4)
+
+    with open("projects/mp2/evidence/program_outputs_2026-10-22.txt", "w") as _file:
+        _file.write(f"{'Date':<12}{'High (F)':>11}{'Low (F)':>11}{'Rain (%)':>11}{'Wind (mph)':>12}{'Pass?':>10}\n")
+        _file.write("-" * 67 + "\n")
+        for _day in weather_records:
+            _passes, _broken = check_weather(_day, weather_limits)
+            _status = "Yes" if _passes else "No"
+            _file.write(f"{_day['date']:<12}{_day['high_f']:>11.1f}{_day['low_f']:>11.1f}{_day['rain_chance']:>11}{_day['wind_mph']:>12.1f}{_status:>10}\n")
+        _file.write("\n")
+        _file.write(f"The best day for an outdoor event in {place}, {state} is {recommended_day['date']}, with a high temperature of {recommended_day['high_f']}\u00b0F, a {recommended_day['rain_chance']}% chance of rain, and wind speeds of {recommended_day['wind_mph']} mph. It meets all weather requirements and has the best combination of rain probability and wind speed among qualifying days.\n")
+
+    print("Saved evidence files to projects/mp2/evidence/")
     return
 
 
