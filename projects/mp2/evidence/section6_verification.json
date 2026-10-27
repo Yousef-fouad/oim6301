@@ -1,12 +1,5 @@
 {
-    "recommended_day": {
-        "date": "2026-10-25",
-        "high_f": 65.5,
-        "low_f": 43.8,
-        "rain_chance": 0,
-        "wind_mph": 5.1
-    },
-    "main_function_broken_rules": 0,
-    "independent_check_broken_rules": 0,
+    "main_recommended_date": "2026-10-31",
+    "independent_recommended_date": "2026-10-31",
     "agree": true
 }

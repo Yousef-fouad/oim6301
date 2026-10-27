@@ -286,7 +286,6 @@ def _(
     print(check_weather(weather_records[0], weather_limits))
 
     # (True, 0)
-
     return check_weather, weather_limits
 
 
@@ -331,7 +330,6 @@ def _(check_weather, weather_limits, weather_records):
     print(recommended_day)
 
     # {'date': '2026-10-25', 'high_f': 65.5, 'low_f': 43.8, 'rain_chance': 0, 'wind_mph': 5.1}
-
     return (recommended_day,)
 
 
@@ -420,7 +418,6 @@ def _(check_weather, weather_limits, weather_records):
     # 2026-10-26         69.8       45.6          0         7.2       Yes
     # 2026-10-27         56.4       44.0          0         9.1       Yes
     # 2026-10-28         54.7       39.5          1         5.5        No
-
     return
 
 
@@ -434,7 +431,6 @@ def _(check_weather, place, recommended_day, state, weather_limits):
         print(f"No day meets all weather requirements in {place}, {state}. The best alternative is {recommended_day['date']}, with a high temperature of {recommended_day['high_f']}°F, a {recommended_day['rain_chance']}% chance of rain, and wind speeds of {recommended_day['wind_mph']} mph. It breaks {_best_broken} weather rule(s), the fewest among the seven days.")
 
         # The best day for an outdoor event in Wellesley, Massachusetts is 2026-10-25, with a high temperature of 65.5°F, a 0% chance of rain, and wind speeds of 5.1 mph. It meets all weather requirements and has the best combination of rain probability and wind speed among qualifying days.
-
     return
 
 
@@ -451,60 +447,61 @@ def _(mo):
 
     **On October 22, 2026, my program recommended October 25 for an outdoor event in Wellesley, Massachusetts.**
 
-    I independently checked the recommended day using separate if statements to count how many weather requirements it broke, without calling my original function.
+    I independently checked my program's recommended date by sorting the qualifying days by their rain probability, wind speed, and date. If no days qualified, I sorted them by the number of broken rules and then date.
+
+    I compared the first day from this independent ranking with my program's recommendation. If both dates match, the verification displays True.
 
     **Result from the main program:**
-
-    0 broken rules.
+    The recommended date.
 
     **Result from the independent check:**
-
-    0 broken rules.
+    The date selected by independently filtering and sorting the weather records.
 
     **Do they agree?**
 
-    Yes, both methods returned 0 broken rules, and Python displayed True. This confirms that my recommended day, October 25, met all four weather requirements and that my function correctly identifies the number of broken rules.
+    Both methods selected the same recommended date, and Python displayed True. The independent check uses sorting rather than the original selection function.
     """)
     return
 
 
 @app.cell
 def _(
-    check_weather,
     highest_high_f,
     lowest_high_f,
     max_rain_chance,
     max_wind_mph,
     recommended_day,
-    weather_limits,
+    weather_records,
 ):
-    # Result from the main function
-    main_broken = check_weather(recommended_day, weather_limits)[1]
+    # Independent verification using sorting
+    _passing_days = []
+    _fallback_days = []
 
-    # Independent calculation
-    independent_broken = 0
+    for _day in weather_records:
+        _temp_ok = lowest_high_f <= _day["high_f"] <= highest_high_f
+        _rain_ok = _day["rain_chance"] <= max_rain_chance
+        _wind_ok = _day["wind_mph"] <= max_wind_mph
 
-    if recommended_day["high_f"] < lowest_high_f:
-        independent_broken += 1
+        _broken = int(not _temp_ok) + int(not _rain_ok) + int(not _wind_ok)
 
-    if recommended_day["high_f"] > highest_high_f:
-        independent_broken += 1
+        if _broken == 0:
+            _passing_days.append((_day["rain_chance"], _day["wind_mph"], _day["date"]))
 
-    if recommended_day["rain_chance"] > max_rain_chance:
-        independent_broken += 1
+        _fallback_days.append((_broken, _day["date"]))
 
-    if recommended_day["wind_mph"] > max_wind_mph:
-        independent_broken += 1
+    if len(_passing_days) > 0:
+        _passing_days.sort()
+        independent_date = _passing_days[0][2]
+    else:
+        _fallback_days.sort()
+        independent_date = _fallback_days[0][1]
 
-    # Compare both results
-    print("Main function - broken rules:", main_broken)
-    print("Independent check - broken rules:", independent_broken)
-    print("Do they agree?", main_broken == independent_broken)
+    main_date = recommended_day["date"]
 
-    # Main function - broken rules: 0
-    # Independent check - broken rules: 0
-    # Do they agree? True
-    return independent_broken, main_broken
+    print("Main program:", main_date)
+    print("Independent verification:", independent_date)
+    print("Do they agree?", main_date == independent_date)
+    return independent_date, main_date
 
 
 @app.cell(hide_code=True)
@@ -524,7 +521,7 @@ def _(mo):
 
     **How do I know the code works correctly?**
 
-    In Section 6, I independently verified my `check_weather()` function using separate `if` statements. In my latest test, both calculations returned 0 broken rules, and Python displayed `True`. In my earlier October 16 test, the function correctly identified 1 broken rule. These results show that my function works correctly even when the live weather forecast changes.
+    In Section 6, Independently checked the recommended date using sorting. In my latest test, both calculations returned 0 broken rules, and Python displayed `True`. In my earlier October 16 test, the function correctly identified 1 broken rule. These results show that my function works correctly even when the live weather forecast changes.
 
     **Which cell or GitHub commit demonstrates this?**
 
@@ -641,13 +638,10 @@ def _(check_weather, weather_limits, weather_records):
 @app.cell
 def _(
     check_weather,
-    independent_broken,
+    independent_date,
     json,
-    main_broken,
+    main_date,
     os,
-    place,
-    recommended_day,
-    state,
     weather_limits,
     weather_records,
 ):
@@ -657,16 +651,16 @@ def _(
         json.dump(weather_records, _file, indent=4)
 
     verification_results = {
-        "recommended_day": recommended_day,
-        "main_function_broken_rules": main_broken,
-        "independent_check_broken_rules": independent_broken,
-        "agree": main_broken == independent_broken
+        "main_recommended_date": main_date,
+        "independent_recommended_date": independent_date,
+        "agree": main_date == independent_date
     }
 
     with open("projects/mp2/evidence/section6_verification.json", "w") as _file:
         json.dump(verification_results, _file, indent=4)
 
     going_further_scores = {}
+
     for _day in weather_records:
         _broken = check_weather(_day, weather_limits)[1]
         going_further_scores[_day["date"]] = 10 - (_broken * 2)
@@ -674,17 +668,8 @@ def _(
     with open("projects/mp2/evidence/section9_scores.json", "w") as _file:
         json.dump(going_further_scores, _file, indent=4)
 
-    with open("projects/mp2/evidence/program_outputs_2026-10-22.txt", "w") as _file:
-        _file.write(f"{'Date':<12}{'High (F)':>11}{'Low (F)':>11}{'Rain (%)':>11}{'Wind (mph)':>12}{'Pass?':>10}\n")
-        _file.write("-" * 67 + "\n")
-        for _day in weather_records:
-            _passes, _broken = check_weather(_day, weather_limits)
-            _status = "Yes" if _passes else "No"
-            _file.write(f"{_day['date']:<12}{_day['high_f']:>11.1f}{_day['low_f']:>11.1f}{_day['rain_chance']:>11}{_day['wind_mph']:>12.1f}{_status:>10}\n")
-        _file.write("\n")
-        _file.write(f"The best day for an outdoor event in {place}, {state} is {recommended_day['date']}, with a high temperature of {recommended_day['high_f']}\u00b0F, a {recommended_day['rain_chance']}% chance of rain, and wind speeds of {recommended_day['wind_mph']} mph. It meets all weather requirements and has the best combination of rain probability and wind speed among qualifying days.\n")
-
     print("Saved evidence files to projects/mp2/evidence/")
+
     return
 
 
@@ -695,7 +680,7 @@ def _(mo):
 
     Approximate number of hours spent working on this project outside class:
 
-    [ 8 hours]
+    [ 9 hours]
 
     This section is not graded.
     """)
