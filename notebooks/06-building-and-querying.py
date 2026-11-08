@@ -130,24 +130,14 @@ def _(mo):
 
 
 @app.cell
-def _(mo):
-    _df = mo.sql(
-        f"""
-        def ask(sql):
-            with duckdb.connect(database, read_only=True) as _con:
-                return _con.sql(sql).pl()
-        """
-    )
-    return
-
-
-@app.cell
 def _(county_rows, duckdb, mo, town_rows):
     _file = mo.notebook_dir().parent / "data" / "ma-towns.duckdb"
     _file.parent.mkdir(exist_ok=True)
     _file.unlink(missing_ok=True)
 
     with duckdb.connect(_file) as _con:
+        _con.register("county_rows", county_rows)
+        _con.register("town_rows", town_rows)
         _con.execute("""
             CREATE TABLE counties (
                 name                      VARCHAR PRIMARY KEY,
@@ -167,18 +157,12 @@ def _(county_rows, duckdb, mo, town_rows):
                 average_single_family_bill_dollars INTEGER CHECK (average_single_family_bill_dollars >= 0)
             )
         """)
-        _con.execute(
-            """
+        _con.execute("""
             INSERT INTO counties
             SELECT name, fips_code, towns, population, founded_year, government_abolished_year
             FROM county_rows
-            """,
-            {"county_rows": county_rows},
-        )
-        _con.execute(
-            "INSERT INTO towns SELECT * FROM town_rows",
-            {"town_rows": town_rows},
-        )
+        """)
+        _con.execute("INSERT INTO towns SELECT * FROM town_rows")
         _con.execute("""
             CREATE VIEW high_bill_towns_by_county AS
                 SELECT county, count(*) AS towns
@@ -201,15 +185,12 @@ def _(mo):
 
 
 @app.cell
-def _(mo):
-    _df = mo.sql(
-        f"""
-        def ask(sql):
-            with duckdb.connect(database, read_only=True) as _con:
-                return _con.sql(sql).pl()
-        """
-    )
-    return
+def _(database, duckdb):
+    def ask(sql):
+        with duckdb.connect(database, read_only=True) as _con:
+            return _con.sql(sql).pl()
+
+    return (ask,)
 
 
 @app.cell
@@ -240,8 +221,128 @@ def _(mo):
 
 
 @app.cell
+def _(database, duckdb):
+
+
+    with duckdb.connect(database) as _con:
+
+        _con.execute("""
+            CREATE TABLE IF NOT EXISTS town_bills (
+                name VARCHAR NOT NULL REFERENCES towns(name),
+                fiscal_year INTEGER NOT NULL,
+                average_single_family_bill_dollars INTEGER,
+                PRIMARY KEY (name, fiscal_year)
+            )
+        """)
+
+        _con.execute("""
+            INSERT OR IGNORE INTO town_bills
+            VALUES ('Wellesley', 2025, 19792)
+        """)
+
+        _con.execute("""
+            INSERT OR IGNORE INTO town_bills
+            VALUES ('Wellesley', 2026, 20551)
+        """)
+
+    return
+
+
+@app.cell
 def _(ask):
-    ask('SELECT * FROM coutries')
+
+    ask("""
+        SELECT *
+        FROM town_bills
+        WHERE name = 'Wellesley'
+          AND fiscal_year IN (2025, 2026)
+        ORDER BY fiscal_year
+    """)
+    return
+
+
+@app.cell
+def _(ask, database, duckdb, requests):
+    response = requests.get(
+        "https://oim.zhili.dev/ma/towns",
+        params={"county": "Norfolk", "per_page": 100},
+        timeout=20,
+    )
+    response.raise_for_status()
+    norfolk_towns = response.json()["items"]
+
+    # 2. Collect historical bills for every town
+    bill_records = []
+
+    for town in norfolk_towns:
+        town_code = town.get("dor_code") or town.get("id")
+
+        if town_code is None:
+            raise ValueError(f"Missing town code: {town}")
+
+        response = requests.get(
+            f"https://oim.zhili.dev/ma/towns/{town_code}/history",
+            timeout=20,
+        )
+        response.raise_for_status()
+        history = response.json()
+
+        for year in history["years"]:
+            bill = year["average_single_family_bill_dollars"]
+
+            if bill is not None:
+                bill_records.append((
+                    history["name"],
+                    year["fiscal_year"],
+                    bill,
+                ))
+
+    # 3. Create the table and load the records
+    with duckdb.connect(database) as con:
+        con.execute("""
+            CREATE TABLE IF NOT EXISTS town_bills (
+                name VARCHAR REFERENCES towns(name),
+                fiscal_year INTEGER,
+                average_single_family_bill_dollars INTEGER,
+                PRIMARY KEY (name, fiscal_year)
+            )
+        """)
+
+        con.executemany("""
+            INSERT OR REPLACE INTO town_bills
+            VALUES (?, ?, ?)
+        """, bill_records)
+
+    # 4. Compare bills from 2016 and 2026
+    ask("""
+        SELECT
+            newer.name,
+            older.average_single_family_bill_dollars AS bill_2016,
+            newer.average_single_family_bill_dollars AS bill_2026,
+            newer.average_single_family_bill_dollars
+                - older.average_single_family_bill_dollars
+                AS dollar_increase,
+            ROUND(
+                100.0 * (
+                    newer.average_single_family_bill_dollars
+                    - older.average_single_family_bill_dollars
+                ) / NULLIF(
+                    older.average_single_family_bill_dollars, 0
+                ),
+                2
+            ) AS percentage_increase
+        FROM town_bills AS older
+        JOIN town_bills AS newer
+            ON older.name = newer.name
+        JOIN towns AS t
+            ON t.name = older.name
+        WHERE t.county = 'Norfolk'
+            AND older.fiscal_year = 2016
+            AND newer.fiscal_year = 2026
+        ORDER BY dollar_increase DESC
+        LIMIT 1
+    """)
+
     return
 
 
@@ -277,6 +378,70 @@ def _(mo):
     *Check yourself: the three messages contain `Duplicate key`, `CHECK constraint failed` and `foreign key`.*
 
     **Going further.** Find a rule the scenario of your database project states that a constraint cannot hold, and write the query that checks it instead.
+    """)
+    return
+
+
+@app.cell
+def _(database, duckdb, pl):
+    _tests = [
+        (
+            "Duplicate name",
+            ("Wellesley", "Norfolk", 100, 0, 0)
+        ),
+        (
+            "Population of zero",
+            ("Test Zero Pop", "Norfolk", 0, 0, 0)
+        ),
+        (
+            "Nonexistent county",
+            ("Test Missing County", "Atlantis", 100, 0, 0)
+        )
+    ]
+
+    constraint_results = []
+
+    for _label, _values in _tests:
+        try:
+            with duckdb.connect(database) as _con:
+                _con.execute("""
+                    INSERT INTO towns
+                    (name, county, population,
+                     income_per_capita_dollars,
+                     average_single_family_bill_dollars)
+                    VALUES (?, ?, ?, ?, ?)
+                """, _values)
+
+            constraint_results.append(
+                (_label, "Insert accepted")
+            )
+
+        except duckdb.ConstraintException as _error:
+            constraint_results.append(
+                (_label, str(_error).splitlines()[0])
+            )
+
+    pl.DataFrame(
+        constraint_results,
+        schema=["Test", "Error Message"],
+        orient="row"
+    )
+
+    return
+
+
+@app.cell
+def _(ask):
+    ask("""
+        SELECT
+            c.name AS county,
+            c.towns AS expected_towns,
+            COUNT(t.name) AS actual_towns
+        FROM counties AS c
+        LEFT JOIN towns AS t
+            ON c.name = t.county
+        GROUP BY c.name, c.towns
+        HAVING COUNT(t.name) <> c.towns
     """)
     return
 
@@ -320,10 +485,36 @@ def _(mo):
 @app.cell
 def _(ask):
     ask("""
-        SELECT name, average_single_family_bill_dollars
+        SELECT
+            name,
+            population,
+            average_single_family_bill_dollars
         FROM towns
         WHERE population > 50000
         ORDER BY average_single_family_bill_dollars DESC
+        LIMIT 5
+    """)
+
+    return
+
+
+@app.cell
+def _(ask):
+    ask("""
+        SELECT
+            t.name AS town,
+            c.name AS county,
+            t.population AS town_population,
+            c.population AS county_population,
+            ROUND(
+                100.0 * t.population / c.population, 2
+            ) AS percent_of_county_population,
+            t.average_single_family_bill_dollars
+        FROM towns AS t
+        JOIN counties AS c
+            ON t.county = c.name
+        WHERE t.population > 50000
+        ORDER BY t.average_single_family_bill_dollars DESC
         LIMIT 5
     """)
 
