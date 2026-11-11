@@ -145,21 +145,6 @@ def _(database, duckdb, mo):
     return
 
 
-@app.cell
-def _(ask):
-    for _table in [
-        "members",
-        "portfolios",
-        "assets",
-        "ticker_history",
-        "closing_prices",
-        "trades"
-    ]:
-        _result = ask(f"SELECT COUNT(*) AS total FROM {_table}")
-        print(_table, _result["total"][0])
-    return
-
-
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
@@ -183,6 +168,29 @@ def _(mo, pl):
     ).properties(
         title="Apple's Simulated Closing Prices Over 12 Months"
     )
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    # Row Counts
+    """)
+    return
+
+
+@app.cell
+def _(ask):
+    for _table in [
+        "members",
+        "portfolios",
+        "assets",
+        "ticker_history",
+        "closing_prices",
+        "trades"
+    ]:
+        _result = ask(f"SELECT COUNT(*) AS total FROM {_table}")
+        print(_table, _result["total"][0])
     return
 
 
@@ -286,6 +294,16 @@ def _(ask):
     return
 
 
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    # A View
+
+    This view shows how many units of each asset a portfolio holds by calculating total purchases minus total sales. The Investment Club can use it regularly to check portfolio holdings without rewriting the SQL query.
+    """)
+    return
+
+
 @app.cell
 def _(ask):
     ask("""
@@ -293,6 +311,30 @@ def _(ask):
         FROM portfolio_holdings
         LIMIT 5
     """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    # The Data
+
+    I generated six CSV files using make_data.py, covering November 11, 2025, through November 10, 2026.
+
+    The data includes 15 members, 18 portfolios, 12 assets, 13 ticker history records, 3,340 closing prices, and 344 trades.
+
+    I intentionally created four trades that violate two business rules:
+
+    - Trades 341 and 342: Transactions made on days without a closing price.
+    - Trades 343 and 344: Sell transactions that exceed the portfolio's available holdings.
+
+    These violations will be identified using SQL queries in Part B.
+    """)
+    return
+
+
+@app.cell
+def _():
     return
 
 
