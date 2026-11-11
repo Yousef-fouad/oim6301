@@ -244,7 +244,6 @@ def _(database, duckdb):
             INSERT OR IGNORE INTO town_bills
             VALUES ('Wellesley', 2026, 20551)
         """)
-
     return
 
 
@@ -342,7 +341,6 @@ def _(ask, database, duckdb, requests):
         ORDER BY dollar_increase DESC
         LIMIT 1
     """)
-
     return
 
 
@@ -426,7 +424,6 @@ def _(database, duckdb, pl):
         schema=["Test", "Error Message"],
         orient="row"
     )
-
     return
 
 
@@ -494,7 +491,6 @@ def _(ask):
         ORDER BY average_single_family_bill_dollars DESC
         LIMIT 5
     """)
-
     return
 
 
@@ -517,7 +513,6 @@ def _(ask):
         ORDER BY t.average_single_family_bill_dollars DESC
         LIMIT 5
     """)
-
     return
 
 
@@ -539,6 +534,19 @@ def _(ask):
         WHERE average_single_family_bill_dollars > 10000
         GROUP BY county
         ORDER BY towns DESC
+    """)
+    return
+
+
+@app.cell
+def _(ask):
+    ask("""
+        SELECT
+            county,
+            COUNT(*) AS town_count,
+            SUM(population) AS total_pop, round(avg(population)) AS avg_pop
+        FROM towns
+        GROUP BY county
     """)
     return
 
