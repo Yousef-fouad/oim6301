@@ -1,0 +1,16 @@
+member_id,first_name,last_name,school_email,class_year,join_date
+1,Adam,Smith,member1@student.example.edu,2026,2025-06-28
+2,Sarah,Johnson,member2@student.example.edu,2027,2025-06-18
+3,Omar,Hassan,member3@student.example.edu,2028,2025-06-08
+4,Emma,Brown,member4@student.example.edu,2029,2025-05-29
+5,James,Wilson,member5@student.example.edu,2026,2025-05-19
+6,Maya,Khan,member6@student.example.edu,2027,2025-05-09
+7,Daniel,Davis,member7@student.example.edu,2028,2025-04-29
+8,Sophia,Martin,member8@student.example.edu,2029,2025-04-19
+9,Noah,Anderson,member9@student.example.edu,2026,2025-04-09
+10,Layla,Ahmed,member10@student.example.edu,2027,2025-03-30
+11,Ethan,Taylor,member11@student.example.edu,2028,2025-03-20
+12,Olivia,Lee,member12@student.example.edu,2029,2025-03-10
+13,Ali,Patel,member13@student.example.edu,2026,2025-02-28
+14,Chloe,White,member14@student.example.edu,2027,2025-02-18
+15,Ryan,Clark,member15@student.example.edu,2028,2025-02-08
