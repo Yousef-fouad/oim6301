@@ -79,7 +79,7 @@ def _(as_of, ask):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    **Answer:** During the 30 days ending November 10, 2026, Portfolio 1 made 2 trades and spent $1,240.58 on purchases, while Portfolio 10 made 2 trades and spent $323,788.78. The query also calculates each portfolio's sales proceeds separately, after fees.
+    **Answer:** Answer: During the 30 days ending November 10, 2026, Portfolio 1 made two trades and spent $1,240.58 on purchases, while Portfolio 10 made two trades and spent $323,788.78. Portfolio 5 made two trades, spending $3,033.66 on purchases and receiving $633.84 from sales after fees.
     """)
     return
 

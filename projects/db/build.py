@@ -191,6 +191,14 @@ def _(mo, pl):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
+    The simulated stock prices appear reasonably realistic because they fluctuate throughout the year rather than moving in a straight line. However, these are randomly generated prices and do not represent Apple's actual stock prices.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
     # Row Counts
     """)
     return
@@ -208,14 +216,6 @@ def _(ask):
     ]:
         _result = ask(f"SELECT COUNT(*) AS total FROM {_table}")
         print(_table, _result["total"][0])
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    The simulated stock prices appear reasonably realistic because they fluctuate throughout the year rather than moving in a straight line. However, these are randomly generated prices and do not represent Apple's actual stock prices.
-    """)
     return
 
 
