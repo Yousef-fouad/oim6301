@@ -29,11 +29,6 @@ def _():
     return (as_of,)
 
 
-@app.cell
-def _():
-    return
-
-
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
@@ -78,7 +73,6 @@ def _(as_of, ask):
         GROUP BY p.portfolio_id, p.name
         ORDER BY p.portfolio_id
     """)
-
     return
 
 
@@ -129,7 +123,14 @@ def _(ask):
         GROUP BY m.member_id, m.first_name, m.last_name
         ORDER BY m.member_id
     """)
+    return
 
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    **Answer:** The Investment Club has 15 members, including three members who own no portfolios. Adam Smith owns two portfolios and has purchased investments totaling $2,228,135.66.
+    """)
     return
 
 
@@ -180,7 +181,14 @@ def _(as_of, ask):
 
         ORDER BY p.portfolio_id, a.asset_id
     """)
+    return
 
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    **Answer:** As of November 10, 2026, there are 156 portfolio-asset combinations with positive holdings. For example, Portfolio 1 holds seven units of Apple and 15 units of Microsoft.
+    """)
     return
 
 
@@ -229,7 +237,14 @@ def _(as_of, ask):
 
         ORDER BY t.trade_date, t.trade_id
     """)
+    return
 
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    **Answer:**There were 94 trades during the last 90 days. For example, trade 251 purchased NVIDIA at $538.88 per unit, which was 1.01% above its closing price of $533.50. Two trades had no recorded closing price.
+    """)
     return
 
 
@@ -264,7 +279,7 @@ def _(ask):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    **Answer:** The Vanguard Total Bond Market ETF is tracked by the Investment Club but has never been traded by any portfolio.
+    **Answer:** The Vanguard Total Bond Market ETF is the only one of the 12 assets tracked by the Investment Club that has never been bought or sold by any portfolio.
     """)
     return
 
@@ -318,7 +333,14 @@ def _(as_of, ask):
 
         GROUP BY a.name
     """)
+    return
 
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    **Answer:** Crescent Analytics had a total traded value of $7,430.43 during the year, consisting of $4,108.55 under its old ticker CRSA and $3,321.88 under its new ticker CRSB.
+    """)
     return
 
 
@@ -358,7 +380,6 @@ def _(ask):
 
         ORDER BY t.trade_id
     """)
-
     return
 
 
@@ -427,7 +448,6 @@ def _(ask):
 
         ORDER BY t.trade_id
     """)
-
     return
 
 
@@ -482,7 +502,6 @@ def _(as_of, ask):
 
         ORDER BY crypto_market_value DESC, p.portfolio_id
     """)
-
     return
 
 
@@ -500,18 +519,6 @@ def _(mo):
     ## Question 10 — Trading Fees by Asset Type
 
     How much has the Investment Club paid in trading fees for stocks, ETFs, and cryptocurrencies over the year?
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    # How I Know These Numbers Are Right
-
-    ## Check 1 — Trading Fees
-
-    I independently calculated the total trading fees directly from the CSV file using Python and compared the result with Question 10's SQL output.
     """)
     return
 
@@ -549,33 +556,68 @@ def _(mo):
     return
 
 
-@app.cell
-def _(fees_by_type, mo):
-    import csv
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    # How I Know These Numbers Are Right
 
-    csv_total_fees = 0
-    csv_trade_count = 0
+    ## Check 1 — Trading Fees
+
+    I independently calculated the number of trades and total trading fees for each asset category using Python dictionaries, loops, and the original CSV files. I compared these results with Question 10's SQL output to verify that both the trade counts and fees were correctly allocated across stocks, ETFs, and cryptocurrencies.
+    """)
+    return
+
+
+@app.cell
+def _(as_of, fees_by_type, mo):
+    import csv
+    from datetime import date as _date, timedelta as _timedelta
+
+    # Read asset categories directly from CSV
+    _asset_types = {}
+
+    with open(mo.notebook_dir() / "data" / "assets.csv", newline="") as _file:
+        for _row in csv.DictReader(_file):
+            _asset_types[_row["asset_id"]] = _row["asset_type"]
+
+    # Calculate fees and trade counts independently
+    _csv_results = {}
+
+    _end = _date.fromisoformat(as_of)
+    _start = _end - _timedelta(days=364)
 
     with open(mo.notebook_dir() / "data" / "trades.csv", newline="") as _file:
-        _reader = csv.DictReader(_file)
+        for _trade in csv.DictReader(_file):
+            _day = _date.fromisoformat(_trade["trade_date"])
 
-        for _trade in _reader:
-            csv_total_fees += float(_trade["fee"])
-            csv_trade_count += 1
+            if _start <= _day <= _end:
+                _category = _asset_types[_trade["asset_id"]]
 
-    csv_total_fees = round(csv_total_fees, 2)
+                if _category not in _csv_results:
+                    _csv_results[_category] = [0, 0.0]
 
-    sql_total_fees = round(sum(fees_by_type["total_trading_fees"]), 2)
-    sql_trade_count = sum(fees_by_type["number_of_trades"])
+                _csv_results[_category][0] += 1
+                _csv_results[_category][1] += float(_trade["fee"])
 
-    print("SQL total fees:", sql_total_fees)
-    print("CSV total fees:", csv_total_fees)
-    print("SQL trade count:", sql_trade_count)
-    print("CSV trade count:", csv_trade_count)
-    print("Do they agree?", sql_total_fees == csv_total_fees and sql_trade_count == csv_trade_count)
+    # Read the original SQL results
+    _sql_results = {}
 
-    assert sql_total_fees == csv_total_fees
-    assert sql_trade_count == csv_trade_count
+    for _row in fees_by_type.iter_rows(named=True):
+        _sql_results[_row["asset_type"]] = [
+            _row["number_of_trades"],
+            round(_row["total_trading_fees"], 2)
+        ]
+
+    # Compare every category
+    for _category in sorted(_csv_results):
+        print(_category)
+        print("SQL:", _sql_results.get(_category))
+        print("Python:", _csv_results[_category])
+        print()
+
+    print("Do all categories agree?", _sql_results == _csv_results)
+
+    assert _sql_results == _csv_results
     return (csv,)
 
 
@@ -591,7 +633,6 @@ def _(mo):
 
 @app.cell
 def _(csv, mo, untraded_assets_sql):
-
     # Read all assets
     _assets = {}
 
@@ -620,7 +661,6 @@ def _(csv, mo, untraded_assets_sql):
     print("Do they agree?", sorted(_sql_untraded) == sorted(_csv_untraded))
 
     assert sorted(_sql_untraded) == sorted(_csv_untraded)
-
     return
 
 
@@ -647,7 +687,7 @@ def _(mo):
 
     **Chosen question:** How many portfolios does each club member own, and how much money have they spent buying investments?
 
-    **My prediction before grouping:**
+    **My prediction before grouping:**I predicted 347 rows before grouping because there are 344 trades and three members without portfolios. The LEFT JOIN includes those three members, adding three extra rows.
     """)
     return
 
@@ -734,7 +774,7 @@ def _(mo):
 
     Approximate hours spent working on this project outside class:
 
-    12
+    13
     """)
     return
 

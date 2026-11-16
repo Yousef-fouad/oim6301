@@ -122,7 +122,7 @@ def _(database, duckdb, mo):
             )
 
             print("Loaded", _table)
-        
+
         _con.execute("""
             CREATE VIEW portfolio_holdings AS
             SELECT
@@ -140,8 +140,25 @@ def _(database, duckdb, mo):
 
 
     print("Created 6 database tables successfully.")
+    return
 
 
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    # The Data
+
+    I generated six CSV files using make_data.py, covering November 11, 2025, through November 10, 2026.
+
+    The data includes 15 members, 18 portfolios, 12 assets, 13 ticker history records, 3,340 closing prices, and 344 trades.
+
+    I intentionally created four trades that violate two business rules:
+
+    - Trades 341 and 342: Transactions made on days without a closing price.
+    - Trades 343 and 344: Sell transactions that exceed the portfolio's available holdings.
+
+    These violations will be identified using SQL queries in Part B.
+    """)
     return
 
 
@@ -310,25 +327,6 @@ def _(ask):
         SELECT *
         FROM portfolio_holdings
         LIMIT 5
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    # The Data
-
-    I generated six CSV files using make_data.py, covering November 11, 2025, through November 10, 2026.
-
-    The data includes 15 members, 18 portfolios, 12 assets, 13 ticker history records, 3,340 closing prices, and 344 trades.
-
-    I intentionally created four trades that violate two business rules:
-
-    - Trades 341 and 342: Transactions made on days without a closing price.
-    - Trades 343 and 344: Sell transactions that exceed the portfolio's available holdings.
-
-    These violations will be identified using SQL queries in Part B.
     """)
     return
 
