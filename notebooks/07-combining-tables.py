@@ -642,37 +642,21 @@ def _(mo):
 def _(ask, northwind_database):
 
     ask(northwind_database, """
-        WITH country_freight AS (
+        WITH line_counts AS (
             SELECT
-                ShipCountry AS country,
-                COUNT(*) AS total_orders,
-                SUM(Freight) AS total_freight,
-                AVG(Freight) AS freight_per_order
-            FROM orders
-            GROUP BY ShipCountry
-        ),
-        ranked_countries AS (
-            SELECT
-                *,
-                ROW_NUMBER() OVER (
-                    ORDER BY total_freight DESC, country
-                ) AS total_freight_rank,
-                ROW_NUMBER() OVER (
-                    ORDER BY freight_per_order DESC, country
-                ) AS freight_per_order_rank
-            FROM country_freight
+                OrderID,
+                COUNT(*) AS number_of_lines
+            FROM order_details
+            GROUP BY OrderID
         )
         SELECT
-            country,
-            total_orders,
-            ROUND(total_freight, 2) AS total_freight,
-            ROUND(freight_per_order, 2) AS freight_per_order,
-            total_freight_rank,
-            freight_per_order_rank,
-            total_freight_rank - freight_per_order_rank
-                AS rank_change
-        FROM ranked_countries
-        ORDER BY freight_per_order_rank
+            o.OrderID,
+            o.Freight,
+            COALESCE(l.number_of_lines, 0) AS number_of_lines
+        FROM orders AS o
+        LEFT JOIN line_counts AS l
+            ON o.OrderID = l.OrderID
+        ORDER BY o.OrderID
     """)
 
     return
@@ -681,21 +665,17 @@ def _(ask, northwind_database):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    This analysis compares two rankings of shipping countries:
-    total freight and average freight per order.
+    ### Going Further — Freight and Order Lines
 
-    Total freight measures the overall shipping costs associated
-    with each country, whereas freight per order measures the
-    average shipping cost of an individual order.
+    This query produces one row per order, displaying its freight cost and the number of order lines associated with it.
 
-    The ROW_NUMBER() function assigns a separate ranking for
-    each measure. Comparing these rankings identifies countries
-    whose positions change.
+    First, the line_counts CTE groups order_details by OrderID and uses COUNT(*) to calculate the number of lines for each order.
 
-    Countries with many orders may rank highly in total freight
-    without having the highest average freight per order.
-    Conversely, countries with fewer orders may move up when
-    ranked by their average shipping cost.
+    Next, a LEFT JOIN combines these counts with the orders table. COALESCE ensures that orders without matching details display zero rather than NULL.
+
+    By counting order lines before joining, the query avoids duplicating each order's freight across multiple detail rows.
+
+    The result contains 16,282 rows, matching the total number of orders in Northwind. This confirms that the join preserves one row per order.
     """)
     return
 
@@ -991,26 +971,6 @@ def _(mo):
     3. Find the customers in `Sales.Customer` who never placed an order, and the products in `Production.Product` that never sold. *Check yourself: 701 customers and 238 products.*
 
     **Going further.** Answer one question of your own about AdventureWorks that needs three tables, and check it against a total you can get from one of them.
-    """)
-    return
-
-
-@app.cell
-def _(ask_server):
-
-    ask_server("""
-        SELECT
-            (SELECT COUNT(*)
-             FROM Sales.SalesOrderHeader) AS total_orders,
-
-            (SELECT COUNT(*)
-             FROM Sales.SalesOrderDetail) AS total_order_details,
-
-            (SELECT COUNT(*)
-             FROM Sales.SalesOrderHeader AS h
-             JOIN Sales.SalesOrderDetail AS d
-                 ON h.SalesOrderID = d.SalesOrderID
-            ) AS joined_rows
     """)
     return
 
