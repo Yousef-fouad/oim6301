@@ -226,7 +226,6 @@ def _(ask, towns_database):
         JOIN counties AS c
             ON t.county = c.name
     """)
-
     return
 
 
@@ -261,7 +260,6 @@ def _(ask, towns_database):
         ORDER BY population_share_percent DESC
         LIMIT 5
     """)
-
     return
 
 
@@ -307,7 +305,6 @@ def _(ask, towns_database):
         WHERE town_rank = 1
         ORDER BY population_share_percent DESC
     """)
-
     return
 
 
@@ -406,7 +403,6 @@ def _(ask, northwind_database):
         WHERE et.EmployeeID IS NULL
         ORDER BY t.TerritoryDescription
     """)
-
     return
 
 
@@ -444,7 +440,6 @@ def _(ask, northwind_database):
             e.LastName
         ORDER BY territory_count DESC, e.EmployeeID
     """)
-
     return
 
 
@@ -456,7 +451,6 @@ def _(ask, northwind_database):
             COUNT(*) AS total_assignments
         FROM employee_territories
     """)
-
     return
 
 
@@ -475,7 +469,6 @@ def _(ask, northwind_database):
         )
         ORDER BY t.TerritoryDescription
     """)
-
     return
 
 
@@ -612,7 +605,6 @@ def _(ask, northwind_database):
         GROUP BY ShipCountry
         ORDER BY total_freight DESC
     """)
-
     return
 
 
@@ -658,7 +650,6 @@ def _(ask, northwind_database):
             ON o.OrderID = l.OrderID
         ORDER BY o.OrderID
     """)
-
     return
 
 
@@ -722,7 +713,6 @@ def _(ask, northwind_database):
         GROUP BY c.CategoryName
         ORDER BY total_revenue DESC
     """)
-
     return
 
 
@@ -786,7 +776,6 @@ def _(ask, northwind_database):
                 (SELECT revenue FROM direct_revenue), 2
             ) AS direct_total
     """)
-
     return
 
 
@@ -855,7 +844,6 @@ def _(ask, northwind_database):
         GROUP BY category
         ORDER BY revenue_growth DESC
     """)
-
     return
 
 
@@ -992,7 +980,6 @@ def _(ask_server):
                  ON h.SalesOrderID = d.SalesOrderID
             ) AS joined_rows
     """)
-
     return
 
 
@@ -1027,7 +1014,6 @@ def _(ask_server):
                  ON h.SalesOrderID = d.SalesOrderID
             ) AS freight_after_join
     """)
-
     return
 
 
@@ -1075,7 +1061,6 @@ def _(ask_server):
              WHERE d.SalesOrderID IS NULL
             ) AS products_never_sold
     """)
-
     return
 
 
@@ -1121,25 +1106,6 @@ def _(ask_server):
         GROUP BY pc.Name
         ORDER BY total_revenue DESC
     """)
-
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    ### Going Further — Revenue by Product Category
-
-    This analysis examines which product categories generate the most sales revenue in AdventureWorks.
-
-    The query joins sales order details with products, product subcategories, and product categories to calculate revenue by category.
-
-    Bikes generate the highest revenue at $94.65 million, followed by Components ($11.80 million), Clothing ($2.12 million), and Accessories ($1.27 million).
-
-    COUNT(DISTINCT SalesOrderID) counts unique orders within each category, while SUM(LineTotal) calculates category revenue.
-
-    The results demonstrate that Bikes account for the largest share of sales revenue.
-    """)
     return
 
 
@@ -1153,7 +1119,6 @@ def _(ask_server):
             ) AS total_sales_revenue
         FROM Sales.SalesOrderDetail AS d
     """)
-
     return
 
 
@@ -1179,7 +1144,6 @@ def _(ask_server):
         GROUP BY ROLLUP(pc.Name)
         ORDER BY GROUPING(pc.Name), revenue DESC
     """)
-
     return
 
 

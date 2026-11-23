@@ -586,6 +586,189 @@ def _(mo):
     return
 
 
+@app.cell
+def _(ask):
+
+    ask("""
+        SELECT
+            c.name AS county,
+            c.towns AS expected_towns,
+            COUNT(t.name) AS actual_towns,
+            CASE
+                WHEN c.towns = COUNT(t.name)
+                THEN 'Match'
+                ELSE 'Mismatch'
+            END AS validation
+        FROM counties AS c
+        LEFT JOIN towns AS t
+            ON c.name = t.county
+        GROUP BY c.name, c.towns
+        ORDER BY actual_towns DESC
+    """)
+
+    return
+
+
+@app.cell
+def _(ask):
+
+    ask("""
+        SELECT
+            (SELECT SUM(towns)
+             FROM counties) AS total_county_towns,
+            (SELECT COUNT(*)
+             FROM towns) AS total_town_rows
+    """)
+
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ### Exercise D — Question 2: Verifying Town Counts
+
+    The sum of the town counts across all 14 counties is 351, which matches the total number of rows in the towns table.
+
+    This equality holds because every town belongs to exactly one county. When towns are grouped by county, each town is counted once, with no duplication or omission.
+
+    The matching totals confirm that the county-level counts reconcile with the overall number of towns in the database.
+    """)
+    return
+
+
+@app.cell
+def _(ask):
+
+    ask("""
+        SELECT
+            county,
+            SUM(population) AS total_population,
+            SUM(
+                CASE
+                    WHEN average_single_family_bill_dollars > 10000
+                    THEN population
+                    ELSE 0
+                END
+            ) AS high_bill_population,
+            ROUND(
+                100.0 * SUM(
+                    CASE
+                        WHEN average_single_family_bill_dollars > 10000
+                        THEN population
+                        ELSE 0
+                    END
+                ) / SUM(population),
+                2
+            ) AS high_bill_population_percent
+        FROM towns
+        GROUP BY county
+        ORDER BY county
+    """)
+
+    return
+
+
+@app.cell
+def _(ask):
+
+    ask("""
+        SELECT
+            SUM(population) AS total_population,
+            SUM(
+                CASE
+                    WHEN average_single_family_bill_dollars > 10000
+                    THEN population
+                    ELSE 0
+                END
+            ) AS high_bill_population,
+            ROUND(
+                100.0 * SUM(
+                    CASE
+                        WHEN average_single_family_bill_dollars > 10000
+                        THEN population
+                        ELSE 0
+                    END
+                ) / SUM(population),
+                2
+            ) AS statewide_high_bill_percent
+        FROM towns
+    """)
+
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ### Exercise D — Question 3: Population Analysis
+
+    This analysis calculates each county's total town population
+    and the percentage living in towns where the average
+    single-family bill exceeds $10,000.
+
+    SUM(population) calculates the total population, while
+    CASE WHEN includes only the population of towns meeting
+    the bill threshold.
+
+    Dividing the qualifying population by the total population
+    gives the percentage for each county.
+
+    The statewide population check should equal 7,136,171,
+    confirming that the county populations reconcile with
+    the underlying towns data.
+    """)
+    return
+
+
+@app.cell
+def _(ask):
+
+    ask("""
+        SELECT
+            county,
+            COUNT(*) AS town_count,
+            ROUND(
+                AVG(average_single_family_bill_dollars), 2
+            ) AS average_bill
+        FROM towns
+        GROUP BY county
+        ORDER BY average_bill DESC
+    """)
+
+    return
+
+
+@app.cell
+def _(pl, town_rows):
+    town_rows.group_by("county").agg(
+        pl.len().alias("town_count"),
+        pl.col("average_single_family_bill_dollars")
+          .mean()
+          .round(2)
+          .alias("average_bill")
+    ).sort("average_bill", descending=True)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ### Exercise D — Going Further: Average Bills by County
+
+    This analysis identifies which Massachusetts counties have the highest average single-family bills across their towns.
+
+    The SQL query uses GROUP BY to calculate the number of towns and average bill for each county. The results show that Middlesex has the highest average at $11,327.04, followed by Norfolk at $11,148.46.
+
+    To verify the calculations, I repeated the analysis using Polars on the original town_rows dataset.
+
+    Both methods return the same 14 counties, town counts, and average bills, confirming that the SQL aggregation is consistent with the source data.
+
+    These are unweighted averages across towns, not population-weighted averages.
+    """)
+    return
+
+
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
@@ -634,6 +817,61 @@ def _(ask, mo, requests):
         _path.write_bytes(_reply.content)
     orders_file = _path.as_posix()
     ask(f"SELECT count(*) AS orders FROM '{orders_file}'")
+    return (orders_file,)
+
+
+@app.cell
+def _(ask, orders_file):
+
+    ask(f"""
+        SELECT
+            COUNT(DISTINCT ShipCountry) AS total_countries
+        FROM '{orders_file}'
+    """)
+
+    return
+
+
+@app.cell
+def _(ask, orders_file):
+
+    ask(f"""
+        SELECT
+            ShipCountry AS country,
+            COUNT(*) AS total_orders,
+            ROUND(SUM(Freight), 2) AS total_freight
+        FROM '{orders_file}'
+        GROUP BY ShipCountry
+        ORDER BY total_freight DESC
+    """)
+
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ### Exercise E — Northwind Freight by Country
+
+    The query groups Northwind orders by shipping country
+    and calculates the number of orders and total freight
+    for each destination.
+
+    COUNT(*) calculates the order count, while SUM(Freight)
+    calculates total shipping freight. ORDER BY sorts the
+    countries from highest to lowest total freight.
+
+    The USA has the highest total freight at $573,251.00,
+    followed by Germany at $537,189.75 and France at
+    $442,055.75.
+
+    The results cover 21 shipping countries.
+    """)
+    return
+
+
+@app.cell
+def _():
     return
 
 
@@ -645,6 +883,78 @@ def _(mo):
 
     **Going further.** Rank the countries by freight per order instead, and see which countries move.
     """)
+    return
+
+
+@app.cell
+def _(ask, orders_file):
+
+    ask(f"""
+        WITH country_freight AS (
+            SELECT
+                ShipCountry AS country,
+                COUNT(*) AS total_orders,
+                SUM(Freight) AS total_freight,
+                AVG(Freight) AS freight_per_order
+            FROM '{orders_file}'
+            GROUP BY ShipCountry
+        ),
+        ranked_countries AS (
+            SELECT
+                country,
+                total_orders,
+                total_freight,
+                freight_per_order,
+                ROW_NUMBER() OVER (
+                    ORDER BY total_freight DESC, country
+                ) AS total_freight_rank,
+                ROW_NUMBER() OVER (
+                    ORDER BY freight_per_order DESC, country
+                ) AS freight_per_order_rank
+            FROM country_freight
+        )
+        SELECT
+            country,
+            total_orders,
+            ROUND(total_freight, 2) AS total_freight,
+            ROUND(freight_per_order, 2) AS freight_per_order,
+            total_freight_rank,
+            freight_per_order_rank,
+            total_freight_rank - freight_per_order_rank
+                AS rank_change
+        FROM ranked_countries
+        ORDER BY freight_per_order_rank
+    """)
+
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ### Exercise E — Going Further: Freight per Order
+
+    This analysis compares country rankings based on total freight
+    and average freight per order.
+
+    Total freight measures the overall shipping costs associated
+    with each country, while average freight per order measures
+    the shipping cost of a typical order.
+
+    ROW_NUMBER() assigns rankings for both measures. Subtracting
+    the average-freight ranking from the total-freight ranking
+    shows which countries move up or down.
+
+    A country with many orders may rank highly in total freight
+    but lower in average freight per order. Conversely, a country
+    with fewer orders may rank higher when comparing freight per
+    order rather than total freight.
+    """)
+    return
+
+
+@app.cell
+def _():
     return
 
 
