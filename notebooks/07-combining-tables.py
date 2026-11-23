@@ -216,6 +216,122 @@ def _(mo):
     return
 
 
+@app.cell
+def _(ask, towns_database):
+
+    ask(towns_database, """
+        SELECT
+            COUNT(*) AS joined_rows
+        FROM towns AS t
+        JOIN counties AS c
+            ON t.county = c.name
+    """)
+
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    The JOIN returns 351 rows, which matches the number
+    of rows in the towns table. This is because every town
+    belongs to exactly one county, and each county appears
+    only once in the counties table. Therefore, every town
+    matches exactly one county, without adding duplicate
+    rows or excluding any towns.
+    """)
+    return
+
+
+@app.cell
+def _(ask, towns_database):
+
+    ask(towns_database, """
+        SELECT
+            t.name AS town,
+            c.name AS county,
+            t.population AS town_population,
+            c.population AS county_population,
+            ROUND(
+                100.0 * t.population / c.population, 1
+            ) AS population_share_percent
+        FROM towns AS t
+        JOIN counties AS c
+            ON t.county = c.name
+        ORDER BY population_share_percent DESC
+        LIMIT 5
+    """)
+
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    Nantucket accounts for 100% of its county's population
+    because Nantucket is the only municipality in Nantucket
+    County. Therefore, the town's population equals the
+    county's total population.
+    """)
+    return
+
+
+@app.cell
+def _(ask, towns_database):
+
+    ask(towns_database, """
+        WITH ranked_towns AS (
+            SELECT
+                c.name AS county,
+                t.name AS town,
+                t.population AS town_population,
+                c.population AS county_population,
+                ROUND(
+                    100.0 * t.population / c.population, 1
+                ) AS population_share_percent,
+                ROW_NUMBER() OVER (
+                    PARTITION BY c.name
+                    ORDER BY
+                        1.0 * t.population / c.population DESC,
+                        t.name
+                ) AS town_rank
+            FROM towns AS t
+            JOIN counties AS c
+                ON t.county = c.name
+        )
+        SELECT
+            county,
+            town,
+            population_share_percent
+        FROM ranked_towns
+        WHERE town_rank = 1
+        ORDER BY population_share_percent DESC
+    """)
+
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    This query identifies the town with the largest share
+    of population in each of Massachusetts's 14 counties.
+
+    The JOIN connects each town to its county's population.
+    The population share is calculated by dividing the town's
+    population by the county's total population and multiplying
+    by 100.
+
+    ROW_NUMBER() ranks towns within each county from the
+    largest population share to the smallest. PARTITION BY
+    restarts the ranking for each county, and WHERE town_rank = 1
+    retains only the highest-ranked town.
+
+    The result contains one town per county.
+    """)
+    return
+
+
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
@@ -273,6 +389,112 @@ def _(mo):
     *Check yourself: four territories, Columbia, Bentonville, Dallas and Austin.*
 
     **Going further.** List the employees with the number of territories each covers, and check that the counts add up to the rows of `employee_territories`. Then find the same four territories with `WHERE NOT EXISTS (...)`.
+    """)
+    return
+
+
+@app.cell
+def _(ask, northwind_database):
+
+    ask(northwind_database, """
+        SELECT
+            t.TerritoryID,
+            t.TerritoryDescription
+        FROM territories AS t
+        LEFT JOIN employee_territories AS et
+            ON t.TerritoryID = et.TerritoryID
+        WHERE et.EmployeeID IS NULL
+        ORDER BY t.TerritoryDescription
+    """)
+
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    The query identifies four territories that are not
+    assigned to any employee: Austin, Bentonville, Columbia,
+    and Dallas.
+
+    LEFT JOIN retains every territory, including those with
+    no matching record in employee_territories.
+
+    The WHERE condition selects only rows where EmployeeID
+    is NULL, meaning no employee is assigned to that territory.
+    """)
+    return
+
+
+@app.cell
+def _(ask, northwind_database):
+
+    ask(northwind_database, """
+        SELECT
+            e.EmployeeID,
+            e.FirstName,
+            e.LastName,
+            COUNT(et.TerritoryID) AS territory_count
+        FROM employees AS e
+        LEFT JOIN employee_territories AS et
+            ON e.EmployeeID = et.EmployeeID
+        GROUP BY
+            e.EmployeeID,
+            e.FirstName,
+            e.LastName
+        ORDER BY territory_count DESC, e.EmployeeID
+    """)
+
+    return
+
+
+@app.cell
+def _(ask, northwind_database):
+
+    ask(northwind_database, """
+        SELECT
+            COUNT(*) AS total_assignments
+        FROM employee_territories
+    """)
+
+    return
+
+
+@app.cell
+def _(ask, northwind_database):
+
+    ask(northwind_database, """
+        SELECT
+            t.TerritoryID,
+            t.TerritoryDescription
+        FROM territories AS t
+        WHERE NOT EXISTS (
+            SELECT 1
+            FROM employee_territories AS et
+            WHERE et.TerritoryID = t.TerritoryID
+        )
+        ORDER BY t.TerritoryDescription
+    """)
+
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    The first query uses LEFT JOIN to include all employees
+    and COUNT(et.TerritoryID) to count their assigned territories.
+    The counts should total 49, matching the number of records
+    in employee_territories.
+
+    The second approach uses NOT EXISTS to identify territories
+    without any matching employee assignment. It returns the
+    same four unassigned territories as the original LEFT JOIN
+    and IS NULL approach: Austin, Bentonville, Columbia, and Dallas.
+
+    Both methods identify unmatched records, but NOT EXISTS
+    checks directly whether a matching record exists rather
+    than producing NULL values through a join.
     """)
     return
 
@@ -378,6 +600,106 @@ def _(mo):
     return
 
 
+@app.cell
+def _(ask, northwind_database):
+
+    ask(northwind_database, """
+        SELECT
+            ShipCountry AS country,
+            COUNT(*) AS total_orders,
+            ROUND(SUM(Freight), 2) AS total_freight
+        FROM orders
+        GROUP BY ShipCountry
+        ORDER BY total_freight DESC
+    """)
+
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    The query calculates total freight for each shipping
+    country directly from the orders table.
+
+    GROUP BY ShipCountry combines orders by destination
+    country, while SUM(Freight) calculates their total
+    freight costs. COUNT(*) shows the number of orders
+    shipped to each country.
+
+    Using the orders table avoids double-counting freight,
+    which would occur if orders were joined to order_details
+    before summing. Each order may have multiple order
+    details, but its freight should only be counted once.
+
+    The 21 country totals should add up to $4,047,470.50,
+    with the USA having the highest total freight.
+    """)
+    return
+
+
+@app.cell
+def _(ask, northwind_database):
+
+    ask(northwind_database, """
+        WITH country_freight AS (
+            SELECT
+                ShipCountry AS country,
+                COUNT(*) AS total_orders,
+                SUM(Freight) AS total_freight,
+                AVG(Freight) AS freight_per_order
+            FROM orders
+            GROUP BY ShipCountry
+        ),
+        ranked_countries AS (
+            SELECT
+                *,
+                ROW_NUMBER() OVER (
+                    ORDER BY total_freight DESC, country
+                ) AS total_freight_rank,
+                ROW_NUMBER() OVER (
+                    ORDER BY freight_per_order DESC, country
+                ) AS freight_per_order_rank
+            FROM country_freight
+        )
+        SELECT
+            country,
+            total_orders,
+            ROUND(total_freight, 2) AS total_freight,
+            ROUND(freight_per_order, 2) AS freight_per_order,
+            total_freight_rank,
+            freight_per_order_rank,
+            total_freight_rank - freight_per_order_rank
+                AS rank_change
+        FROM ranked_countries
+        ORDER BY freight_per_order_rank
+    """)
+
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    This analysis compares two rankings of shipping countries:
+    total freight and average freight per order.
+
+    Total freight measures the overall shipping costs associated
+    with each country, whereas freight per order measures the
+    average shipping cost of an individual order.
+
+    The ROW_NUMBER() function assigns a separate ranking for
+    each measure. Comparing these rankings identifies countries
+    whose positions change.
+
+    Countries with many orders may rank highly in total freight
+    without having the highest average freight per order.
+    Conversely, countries with fewer orders may move up when
+    ranked by their average shipping cost.
+    """)
+    return
+
+
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
@@ -398,6 +720,187 @@ def _(mo):
     return
 
 
+@app.cell
+def _(ask, northwind_database):
+
+    ask(northwind_database, """
+        SELECT
+            c.CategoryName AS category,
+            ROUND(
+                SUM(
+                    d.UnitPrice * d.Quantity * (1 - d.Discount)
+                ), 2
+            ) AS total_revenue
+        FROM order_details AS d
+        JOIN orders AS o
+            ON d.OrderID = o.OrderID
+        JOIN products AS p
+            ON d.ProductID = p.ProductID
+        JOIN categories AS c
+            ON p.CategoryID = c.CategoryID
+        WHERE o.ShipCountry = 'USA'
+        GROUP BY c.CategoryName
+        ORDER BY total_revenue DESC
+    """)
+
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    This query calculates revenue by product category for
+    orders shipped to the USA.
+
+    Four tables are joined to connect order details with
+    orders, products, and product categories.
+
+    Revenue is calculated using UnitPrice × Quantity ×
+    (1 - Discount), which accounts for discounts.
+
+    The WHERE condition limits the analysis to orders
+    shipped to the USA, while GROUP BY calculates the
+    revenue for each of the eight product categories.
+
+    Beverages generates the highest revenue, at
+    approximately $13.38 million.
+    """)
+    return
+
+
+@app.cell
+def _(ask, northwind_database):
+
+    ask(northwind_database, """
+        WITH category_revenue AS (
+            SELECT
+                c.CategoryName,
+                SUM(
+                    d.UnitPrice * d.Quantity * (1 - d.Discount)
+                ) AS revenue
+            FROM order_details AS d
+            JOIN orders AS o
+                ON d.OrderID = o.OrderID
+            JOIN products AS p
+                ON d.ProductID = p.ProductID
+            JOIN categories AS c
+                ON p.CategoryID = c.CategoryID
+            WHERE o.ShipCountry = 'USA'
+            GROUP BY c.CategoryName
+        ),
+        direct_revenue AS (
+            SELECT
+                SUM(
+                    d.UnitPrice * d.Quantity * (1 - d.Discount)
+                ) AS revenue
+            FROM orders AS o
+            JOIN order_details AS d
+                ON o.OrderID = d.OrderID
+            WHERE o.ShipCountry = 'USA'
+        )
+        SELECT
+            ROUND(
+                (SELECT SUM(revenue) FROM category_revenue), 2
+            ) AS category_total,
+            ROUND(
+                (SELECT revenue FROM direct_revenue), 2
+            ) AS direct_total
+    """)
+
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    To validate the revenue calculation, I compared two
+    independent approaches.
+
+    The first calculates revenue for each product category
+    using four joined tables, then adds the eight unrounded
+    category totals.
+
+    The second calculates USA revenue directly from the
+    orders and order_details tables.
+
+    Both calculations return $63,856,337.63, confirming that
+    the category-level revenue reconciles with the overall
+    USA revenue without introducing duplicate or missing
+    transactions.
+    """)
+    return
+
+
+@app.cell
+def _(ask, northwind_database):
+
+    ask(northwind_database, """
+        WITH yearly_revenue AS (
+            SELECT
+                c.CategoryName AS category,
+                YEAR(o.OrderDate) AS order_year,
+                SUM(
+                    d.UnitPrice * d.Quantity * (1 - d.Discount)
+                ) AS revenue
+            FROM order_details AS d
+            JOIN orders AS o
+                ON d.OrderID = o.OrderID
+            JOIN products AS p
+                ON d.ProductID = p.ProductID
+            JOIN categories AS c
+                ON p.CategoryID = c.CategoryID
+            WHERE YEAR(o.OrderDate) IN (2022, 2023)
+            GROUP BY
+                c.CategoryName,
+                YEAR(o.OrderDate)
+        )
+        SELECT
+            category,
+            ROUND(
+                SUM(CASE WHEN order_year = 2022
+                    THEN revenue ELSE 0 END), 2
+            ) AS revenue_2022,
+            ROUND(
+                SUM(CASE WHEN order_year = 2023
+                    THEN revenue ELSE 0 END), 2
+            ) AS revenue_2023,
+            ROUND(
+                SUM(CASE WHEN order_year = 2023
+                    THEN revenue ELSE 0 END)
+                -
+                SUM(CASE WHEN order_year = 2022
+                    THEN revenue ELSE 0 END), 2
+            ) AS revenue_growth
+        FROM yearly_revenue
+        GROUP BY category
+        ORDER BY revenue_growth DESC
+    """)
+
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    This analysis compares annual revenue across product
+    categories in 2022 and 2023.
+
+    Revenue is calculated using UnitPrice multiplied by
+    Quantity and adjusted for Discount.
+
+    The YEAR() function extracts the year from OrderDate.
+    CASE WHEN separates annual revenue into two columns.
+
+    Revenue growth is calculated by subtracting 2022
+    revenue from 2023 revenue. The results are sorted by
+    the largest absolute dollar increase.
+
+    This comparison measures absolute revenue growth,
+    rather than percentage growth.
+    """)
+    return
+
+
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
@@ -406,24 +909,18 @@ def _(mo):
     return
 
 
-app._unparsable_cell(
-    """
-    _df = mo.sql(
-        f\"\"\"
-        ask(northwind_database, \\\"\"\"
+@app.cell
+def _(ask, northwind_database):
+    ask(northwind_database, """
         SELECT
             p.ProductName AS product_name,
             s.CompanyName AS supplier_name
         FROM products AS p
         JOIN suppliers AS s
             ON p.SupplierID = s.SupplierID
-        ORDER BY p.ProductName;
-        \"\"\")
-        \"\"\"
-    )
-    """,
-    name="_"
-)
+        ORDER BY p.ProductName
+    """)
+    return
 
 
 @app.cell(hide_code=True)
@@ -471,7 +968,7 @@ def _(mo, os, pl):
             return pl.DataFrame(_cursor.fetchall(), schema=_columns, orient="row")
 
     ask_server("SELECT TOP 5 SalesOrderID, OrderDate, Freight FROM Sales.SalesOrderHeader ORDER BY SalesOrderID")
-    return
+    return (ask_server,)
 
 
 @app.cell(hide_code=True)
@@ -494,6 +991,252 @@ def _(mo):
     3. Find the customers in `Sales.Customer` who never placed an order, and the products in `Production.Product` that never sold. *Check yourself: 701 customers and 238 products.*
 
     **Going further.** Answer one question of your own about AdventureWorks that needs three tables, and check it against a total you can get from one of them.
+    """)
+    return
+
+
+@app.cell
+def _(ask_server):
+
+    ask_server("""
+        SELECT
+            (SELECT COUNT(*)
+             FROM Sales.SalesOrderHeader) AS total_orders,
+
+            (SELECT COUNT(*)
+             FROM Sales.SalesOrderDetail) AS total_order_details,
+
+            (SELECT COUNT(*)
+             FROM Sales.SalesOrderHeader AS h
+             JOIN Sales.SalesOrderDetail AS d
+                 ON h.SalesOrderID = d.SalesOrderID
+            ) AS joined_rows
+    """)
+    return
+
+
+@app.cell
+def _(ask_server):
+
+    ask_server("""
+        SELECT
+            (SELECT COUNT(*)
+             FROM Sales.SalesOrderHeader) AS total_orders,
+
+            (SELECT COUNT(*)
+             FROM Sales.SalesOrderDetail) AS total_order_details,
+
+            (SELECT COUNT(*)
+             FROM Sales.SalesOrderHeader AS h
+             JOIN Sales.SalesOrderDetail AS d
+                 ON h.SalesOrderID = d.SalesOrderID
+            ) AS joined_rows
+    """)
+
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    The Sales.SalesOrderHeader table contains 31,465 orders,
+    while Sales.SalesOrderDetail contains 121,317 order lines.
+
+    The JOIN returns 121,317 rows because each order can have
+    multiple order details, but every order detail belongs to
+    exactly one order.
+
+    Therefore, each detail row matches one order header,
+    and the JOIN preserves all 121,317 detail rows without
+    introducing additional rows.
+    """)
+    return
+
+
+@app.cell
+def _(ask_server):
+
+    ask_server("""
+        SELECT
+            (SELECT SUM(Freight)
+             FROM Sales.SalesOrderHeader) AS original_freight,
+
+            (SELECT SUM(h.Freight)
+             FROM Sales.SalesOrderHeader AS h
+             JOIN Sales.SalesOrderDetail AS d
+                 ON h.SalesOrderID = d.SalesOrderID
+            ) AS freight_after_join
+    """)
+
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    The original total freight is $3,183,430.25, calculated
+    directly from Sales.SalesOrderHeader.
+
+    After joining Sales.SalesOrderHeader with
+    Sales.SalesOrderDetail, the freight total increases to
+    $78,690,398.20.
+
+    This happens because each order can contain multiple
+    order details. The JOIN repeats the order header's
+    Freight value for every corresponding detail row.
+
+    Therefore, summing Freight after the JOIN results in
+    double-counting or multiple-counting shipping costs.
+
+    To calculate accurate total freight, it should be
+    aggregated at the order level before joining to
+    order details, or calculated directly from the
+    SalesOrderHeader table.
+    """)
+    return
+
+
+@app.cell
+def _(ask_server):
+
+    ask_server("""
+        SELECT
+            (SELECT COUNT(*)
+             FROM Sales.Customer AS c
+             LEFT JOIN Sales.SalesOrderHeader AS h
+                 ON c.CustomerID = h.CustomerID
+             WHERE h.SalesOrderID IS NULL
+            ) AS customers_without_orders,
+
+            (SELECT COUNT(*)
+             FROM Production.Product AS p
+             LEFT JOIN Sales.SalesOrderDetail AS d
+                 ON p.ProductID = d.ProductID
+             WHERE d.SalesOrderID IS NULL
+            ) AS products_never_sold
+    """)
+
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    The query identifies customers who have never placed an
+    order and products that have never been sold.
+
+    LEFT JOIN retains all customers or products, even when
+    there is no matching record in the related sales table.
+
+    For customers, WHERE h.SalesOrderID IS NULL identifies
+    customers without any matching sales orders.
+
+    For products, WHERE d.SalesOrderID IS NULL identifies
+    products without any matching sales order details.
+
+    The results show 701 customers with no orders and
+    238 products that have never been sold.
+
+    This is an example of an anti-join, which identifies
+    records in one table without matches in another.
+    """)
+    return
+
+
+@app.cell
+def _(ask_server):
+
+    ask_server("""
+        SELECT
+            pc.Name AS product_category,
+            COUNT(DISTINCT d.SalesOrderID) AS total_orders,
+            ROUND(SUM(d.LineTotal), 2) AS total_revenue
+        FROM Sales.SalesOrderDetail AS d
+        JOIN Production.Product AS p
+            ON d.ProductID = p.ProductID
+        JOIN Production.ProductSubcategory AS ps
+            ON p.ProductSubcategoryID = ps.ProductSubcategoryID
+        JOIN Production.ProductCategory AS pc
+            ON ps.ProductCategoryID = pc.ProductCategoryID
+        GROUP BY pc.Name
+        ORDER BY total_revenue DESC
+    """)
+
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ### Going Further — Revenue by Product Category
+
+    This analysis examines which product categories generate the most sales revenue in AdventureWorks.
+
+    The query joins sales order details with products, product subcategories, and product categories to calculate revenue by category.
+
+    Bikes generate the highest revenue at $94.65 million, followed by Components ($11.80 million), Clothing ($2.12 million), and Accessories ($1.27 million).
+
+    COUNT(DISTINCT SalesOrderID) counts unique orders within each category, while SUM(LineTotal) calculates category revenue.
+
+    The results demonstrate that Bikes account for the largest share of sales revenue.
+    """)
+    return
+
+
+@app.cell
+def _(ask_server):
+
+    ask_server("""
+        SELECT
+            ROUND(
+                SUM(d.LineTotal), 2
+            ) AS total_sales_revenue
+        FROM Sales.SalesOrderDetail AS d
+    """)
+
+    return
+
+
+@app.cell
+def _(ask_server):
+
+    ask_server("""
+        SELECT
+            CASE
+                WHEN GROUPING(pc.Name) = 1
+                THEN 'GRAND TOTAL'
+                ELSE pc.Name
+            END AS category,
+            COUNT(*) AS sales_lines,
+            ROUND(SUM(d.LineTotal), 2) AS revenue
+        FROM Sales.SalesOrderDetail AS d
+        JOIN Production.Product AS p
+            ON d.ProductID = p.ProductID
+        JOIN Production.ProductSubcategory AS ps
+            ON p.ProductSubcategoryID = ps.ProductSubcategoryID
+        JOIN Production.ProductCategory AS pc
+            ON ps.ProductCategoryID = pc.ProductCategoryID
+        GROUP BY ROLLUP(pc.Name)
+        ORDER BY GROUPING(pc.Name), revenue DESC
+    """)
+
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ### Exercise E — Going Further: Revenue by Product Category
+
+    This analysis examines total sales revenue across AdventureWorks product categories using four joined tables: SalesOrderDetail, Product, ProductSubcategory, and ProductCategory.
+
+    Bikes generate the highest revenue at $94.65 million, followed by Components ($11.80 million), Clothing ($2.12 million), and Accessories ($1.27 million).
+
+    To validate the results, I independently calculated total revenue from SalesOrderDetail and compared it with the revenue after joining all four tables.
+
+    Both calculations return $109,846,381.40, and the number of sales lines remains unchanged at 121,317. This confirms that the joins do not introduce duplicate records or exclude sales.
+
+    The ROLLUP query also confirms that the unrounded category revenues reconcile with the overall total. The $0.01 difference when adding displayed category amounts results from rounding.
     """)
     return
 
